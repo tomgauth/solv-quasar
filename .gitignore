@@ -3,7 +3,7 @@
 node_modules
 
 # Firebase store
-/firebase.js
+./src/boot/firebase.js
 
 # Quasar core related directories
 .quasar
