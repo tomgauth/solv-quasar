@@ -14,21 +14,19 @@
         <q-chip v-else-if="!wordsAnswer.includes(word)"
         class="ma-2">...</q-chip>
       </a>
-      <q-field label="Type the answer here" stack-label>
-        <template v-slot:control>
+      <q-card-section class="q-pa-md">
 
-            <div class="q-pa-md" style="max-width: 300px">
-              <q-input
-                v-model="Answer"
-                filled
-                autogrow
-              />
+      <div class="q-gutter-md" style="max-width: 300px">
+        <q-input v-model="Answer" label="Answer" stack-label>
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">
+             
             </div>
-
-        </template>
-      </q-field>
+          </template>
+        </q-input>
+      </div>
+      </q-card-section>
       <q-card-actions align="around" >
-        <q-btn color="primary" label="confirm" />
         <q-btn color="amber" @click="nextSentence()"  label="Next Sentence" />
       </q-card-actions>
     </q-card>
@@ -56,8 +54,10 @@ export default {
   }),
   watch: {
         Answer: function () {
-        if ((JSON.stringify(this.wordsPrompt) === JSON.stringify(this.wordsAnswer))) {           
-          this.success()
+        if ((JSON.stringify(this.wordsPrompt) === JSON.stringify(this.wordsAnswer))) {   
+          // show all words in green, then success
+          setTimeout(this.success, 500)  
+          
         }
     }
   },
@@ -81,12 +81,25 @@ export default {
         this.sentenceIndex = this.sentenceIndex + 1
         } else {
           this.sentenceIndex = 0
+          this.$q.dialog({
+            title: "confirm",
+            message: "You're done for today!",
+            cancel: true,
+            persistent: true,
+            }).onOk(() => {
+              console.log('>>>> OK')
+              // todo: redirect to pick sentences page
+
+            })
           // implement a modal / alert to say that the session is done
         }
     },
     success: function () {
       // show success
-      this.nextSentence()
+      this.$q.notify({
+        message: 'Correct answer',
+        color: 'secondary'
+      })
     }
   }
 
