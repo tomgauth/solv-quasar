@@ -49,6 +49,14 @@
             <q-item-label>Lesson</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item clickable exact to="/list">
+          <q-item-section avatar>
+            <q-icon name="list" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>List</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable exact to="/settings">
           <q-item-section avatar>
             <q-icon name="settings" />
