@@ -3,7 +3,8 @@
       <q-card-section>
         {{ sentenceToRepeat }}
       </q-card-section>
-      <a v-for="word in wordsPrompt">
+      <a v-for="(word, key) in wordsPrompt"
+        :key="key">
         <q-chip
         v-if="wordsAnswer.includes(word)"
           class="ma-2"
@@ -33,17 +34,13 @@
 
 </template>
 <script>
-
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'lesson-test',
   data: () => ({
     activeClass: "green--text",
-    sentences: [
-      {fr: "Demain, c'est la révolution!", en: "Tomorrow is revolution"},
-      {fr: "le gros pigeon", en: "the fat pigeon"},
-      {fr: "Dans la cave", en: "in the basement"}
-    ],
+    sentences: items,
     sentenceIndex: 0,
     Answer: "",
     sourceLanguage: "",
@@ -62,6 +59,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('items', ['items']),
     sentenceToRepeat: function () {
         return this.sentences[this.sentenceIndex].en
     },

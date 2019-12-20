@@ -41,29 +41,20 @@
     >
       <q-list>
         <q-item-label header>Navigation</q-item-label>
-        <q-item clickable exact to="/">
+        <q-item
+         v-for="nav in navs"
+         :key="nav.label"
+         :to="nav.to"
+         exact
+         clickable
+         >
           <q-item-section avatar>
-            <q-icon name="settings_voice" />
+            <q-icon :name="nav.icon" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Lesson</q-item-label>
+            <q-item-label>{{ nav.label }}</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item clickable exact to="/list">
-          <q-item-section avatar>
-            <q-icon name="list" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>List</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable exact to="/settings">
-          <q-item-section avatar>
-            <q-icon name="settings" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Settings</q-item-label>
-          </q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
@@ -82,7 +73,24 @@ export default {
 
   data () {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen: false,
+      navs : [
+        {
+          label: 'Lesson',
+          icon: "settings_voice",
+          to: '/'
+        },
+        {
+          label: 'List',
+          icon: "list",
+          to: '/list'
+        },
+        {
+          label: 'Settings',
+          icon: "settings",
+          to: '/settings'
+        }     
+      ]
     }
   },
   computed : {

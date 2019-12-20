@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-// import example from './module-example'
+import items from './store-items'
 
 import auth from './store-auth.js'
 // import { auth } from 'firebase'
@@ -19,6 +19,7 @@ export default function (/* { ssrContext } */) {
     modules: {
       // example
       auth,
+      items
     },
 
     // enable strict mode (adds overhead!)

@@ -38,7 +38,7 @@ const actions = {
         console.log('firebaseAuth.signout fired')
         firebaseAuth.signOut()
     },
-    handleAuthStateChange( { commit } ) {
+    handleAuthStateChange( { commit, dispatch } ) {
         console.log('handleAuthStateChange')
 		firebaseAuth.onAuthStateChanged(user => {
 			Loading.hide()
@@ -46,7 +46,8 @@ const actions = {
 		    commit('setLoggedIn', true)
             LocalStorage.set('loggedIn', true)
             //dispatch('lessons/fbReadData', null, { root: true })
-		    this.$router.push('/').catch(err => {})
+            this.$router.push('/').catch(err => {})
+            dispatch('items/fbReadData', null, { root: true })
 		  }
 		  else {
 		  	commit('setLoggedIn', false)
