@@ -40,7 +40,9 @@ export default {
   name: 'lesson-test',
   data: () => ({
     activeClass: "green--text",
-    sentences: items,
+    sentences: {'IDL001QNA001': {selected:false, day:"001", type:"QNA", block_number:"001", name:"L001QNA001", fr: "Comment ça va ?", en: "How is it going ?", words: ["comment", "ça", "va"]},
+        'IDL001MIP001': {selected:false, day:"001", type:"MIP", block_number:"001", name:"L001MIP001", fr: "ça va", en: "It’s okay", words: ["ça", "va"]},
+        },
     sentenceIndex: 0,
     Answer: "",
     sourceLanguage: "",

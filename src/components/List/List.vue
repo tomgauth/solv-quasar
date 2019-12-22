@@ -1,8 +1,10 @@
 <template>
   <q-page class="q-pa-md">
 		<q-list
+      v-if="Object.keys(items).length"
 			separator
 			bordered>
+      
       <item
       v-for="(item, key) in items"
       :key="key"
@@ -12,20 +14,29 @@
 
 
 		</q-list>
+    <q-dialog v-model="showAddItem">
+      <add-item @close="showAddItem = false"/>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
+  data(){
+    return {
+      showAddItem: false
+    }
+  },
 
   computed: {
-      ...mapGetters('items', ['items']) // ,
+      ...mapState('items', ['items']) // ,
   },
   components: {
-    'item' : require('components/List/Item.vue').default
+    'item' : require('components/List/Item.vue').default,
+    'add-item' : require('components/List/Modals/AddItem.vue').default
   }
 }
 </script>

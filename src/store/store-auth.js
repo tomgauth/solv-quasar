@@ -1,4 +1,4 @@
-import { firebaseAuth } from "../boot/firebase"
+import { firebaseAuth, firebaseDb } from "../boot/firebase"
 import { LocalStorage, Loading } from 'quasar'
 import { showErrorMessage } from '../functions/function-show-error-message'
 

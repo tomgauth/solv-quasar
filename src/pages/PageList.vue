@@ -1,6 +1,14 @@
 <template>
   <q-page padding class="flex-center">
+    <q-btn 
+      @click="showAddItem = true"
+      color="primary" 
+      icon="add" 
+      label="Add a sentence" />
     <list/>
+    <q-dialog v-model="showAddItem">
+      <add-item @close="showAddItem = false" />
+    </q-dialog> 
   </q-page>
 </template>
 
@@ -9,10 +17,12 @@
 export default {
     data () {
     return {
+      showAddItem: false
     }
   },
   components: {
-      'list' : require('components/List/List.vue').default
+      'list' : require('components/List/List.vue').default,
+      'add-item' : require('components/List/Modals/AddItem.vue').default
   }
 
 }
