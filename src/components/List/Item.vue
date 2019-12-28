@@ -13,7 +13,7 @@
 
 		    <q-item-section>
 		      <q-item-label>
-		      	{{ item.fr }} {{id}}
+		      	{{ item.fr }}
 		      </q-item-label>
 		    </q-item-section>
 
@@ -23,12 +23,6 @@
 		          	<small>{{ item.en }}</small>
 		          </q-item-label>
         </q-item-section>
-
-        <q-item-section>
-		      <q-item-label>
-		      	{{ item.name }}
-		      </q-item-label>
-		    </q-item-section>
         <q-item-section side>
 		      <q-item-label>
             <div class="row">
@@ -64,7 +58,7 @@
 
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
     props: ['item', 'id'],

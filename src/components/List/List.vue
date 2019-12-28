@@ -1,10 +1,16 @@
 <template>
   <q-page class="q-pa-md">
+    <search />
 		<q-list
       v-if="Object.keys(items).length"
 			separator
 			bordered>
-      
+
+		  <no-items
+			v-if="!Object.keys(items).length && !search"></no-items>
+
+      <p v-if="search && !Object.keys(items).length">No search results.</p>
+
       <item
       v-for="(item, key) in items"
       :key="key"
@@ -32,11 +38,14 @@ export default {
   },
 
   computed: {
-      ...mapState('items', ['items']) // ,
+      ...mapState('items', ['items', 'search']),
+      ...mapGetters('items', ['items'])
   },
   components: {
     'item' : require('components/List/Item.vue').default,
-    'add-item' : require('components/List/Modals/AddItem.vue').default
+    'add-item' : require('components/List/Modals/AddItem.vue').default,
+    'search' : require('components/List/Tools/Search.vue').default,
+    'no-items' : require('components/List/NoItems.vue').default
   }
 }
 </script>
