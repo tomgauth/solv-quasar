@@ -25,7 +25,8 @@ const state = {
         // 'IDL002MIP005': {selected:false, day:"002", type:"MIP", block_number:"005", name:"L002MIP005", fr: "mais", en: "but", words: ["mais"]}
     
     },
-    search: ''
+	search: '',
+	itemIndex: 0
 }
 
 
@@ -44,6 +45,10 @@ const mutations = {
 	},
 	setSort(state, value) {
 		state.sort = value
+	},
+	incrementIndex(state) {
+		console.log("state.itemIndex: ", state.itemIndex)
+		state.itemIndex += 1
 	}
 }
 
@@ -69,7 +74,9 @@ const actions = {
 	setSort({ commit }, value) {
 		commit('setSort', value)
 	},
-
+	incrementIndex({ commit }) {
+		commit('incrementIndex')
+	}, 
     fbReadData({ commit }) {
         console.log("start reading data from firebase")
         let userId = firebaseAuth.currentUser.uid
@@ -117,10 +124,23 @@ const actions = {
 		let userId = firebaseAuth.currentUser.uid
 		let itemRef = firebaseDb.ref('items/' + userId + '/' + itemId)
 		itemRef.remove()
+	},
+	fbIncrementIndex({}) {
+		let userId = firebaseAuth.currentUser.uid
+		let itemIndexRef = firebaseDb.ref('items/'+userId+'/'+ itemIndex)
+		itemIndexRef.incrementIndex()
 	}
 }
 
 const getters = {
+	arrayOfItems: (state) => {
+		console.log(Object.entries(state.items))
+		return Object.entries(state.items)
+	},
+	getItemByName: state => name => {
+		console.log(Object.values(state.items).find(item => item.name === name))
+		return Object.values(state.items).find(item => item.name === name)
+	}, 
     itemsFiltered: (state) => {
 		let itemsFiltered = {}
 		if (state.search) {

@@ -1,7 +1,7 @@
 <template>
 <q-card class="my-card" align="center">
-      <q-card-section>
-        {{ itemToRepeat }}
+      <q-card-section> 
+        {{itemToRepeat.en}}
       </q-card-section>
       <a v-for="(word, key) in wordsPrompt"
         :key="key">
@@ -30,14 +30,16 @@
       </q-card-section>
       <q-card-actions align="around" >
         <q-btn color="amber" @click="nextSentence()"  label="Next Sentence" />
+        <q-btn color="amber" @click="updateItem({ id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0] , updates: { selected: false } } )" label="Unselect"/>
       </q-card-actions>
     </q-card>
 
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
+  props: ['item', 'id'],
   name: 'lesson-test',
   data: () => ({
     activeClass: "green--text",
@@ -50,39 +52,24 @@ export default {
         if ((JSON.stringify(this.wordsPrompt) === JSON.stringify(this.wordsAnswer))) {   
           // show all words in green, then success
           setTimeout(this.success, 500)  
-          
         }
     }
   },
   computed: {
-    ...mapGetters('items', ['items']),
-    ...mapState('items', ['items']),
-
-    selectedItems: {
-      get() {
-        //filter by selected = true
-        Object.filter = (obj, predicate) => 
-            Object.keys(obj)
-                  .filter( key => predicate(obj[key]) )
-                  .reduce( (res, key) => (res[key] = obj[key], res), {} );
-
-        return Object.filter(this.items, item => item.selected == true); 
-        console.log("selectedItems: ",selectedItems)
-
-      }
-    },
+    ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName']),
+    ...mapState('items', ['items', 'itemIndex']),
     itemToRepeat: {
       get() {
-        console.log("item: ", Object.entries(this.selectedItems)[this.itemIndex][1].en)
+        //console.log("item: ", Object.entries(this.selectedItems)[this.itemIndex][1])
 
-        return Object.entries(this.selectedItems)[this.itemIndex][1].en
+        return this.arrayOfItems.filter(item => item[1].selected)[this.itemIndex][1]
 				}
-        // return this.items[this.itemIndex].en
     },
     wordsPrompt:  {
       get() {
         // return [ "je", "vais", "très", "bien" ]
-        return Object.entries(this.selectedItems)[this.itemIndex][1].fr.toLowerCase().replace(/[.,\/#!?$%\^&\*;:{}=\_`~()]/g,"").replace(/\s+/g, " ").split(' ').filter(String)
+        return this.itemToRepeat.fr.toLowerCase().replace(/[.,\/#!?$%\^&\*;:{}=\_`~()]/g,"").replace(/\s+/g, " ").split(' ').filter(String)
+        
        }
     },
     wordsAnswer: {
@@ -92,13 +79,20 @@ export default {
     }
   },
   methods: {
+    ...mapActions('items', ['updateItem', 'incrementIndex']),
     nextSentence: function () {
       //if no nextSentence, session is done
-      let length = Object.keys(this.selectedItems).length
-      console.log(length) 
-      console.log(this.itemIndex)
+      let selectedItems = this.arrayOfItems.filter(item => item[1].selected)
+      console.log("selectedItems: ",selectedItems)
+      console.log('itemToRepeat: ', Object.entries(selectedItems)[this.itemIndex][1])
+      let length = selectedItems.length
+      console.log('length: ',length) 
+      console.log('itemIndex: ',this.itemIndex)
+      
+      this.Answer = ""
       if (this.itemIndex < length - 1) {
-        this.itemIndex = this.itemIndex + 1
+        //this.itemIndex = this.itemIndex + 1
+        this.itemIndex += 1
         } else {
           this.itemIndex = 0
           this.$q.dialog({
