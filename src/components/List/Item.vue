@@ -1,11 +1,12 @@
 <template>
     <div>
-		  <q-item 
-		  	@click="updateItem({ id: id, updates: { selected: !item.selected } } )"
-		  	:class="!item.selected ? 'bg-white-1' : 'bg-green-1'"
-		  	clickable
-		  	v-ripple>
-		    <q-item-section side top>
+		  <q-item
+        :class="!item.selected ? 'bg-white-1' : 'bg-green-1'"
+        >
+		    <q-item-section side
+          @click="updateItem({ id: id, updates: { selected: !item.selected } } )"          
+          v-ripple
+          clickable>
 		      <q-checkbox
           :value="item.selected"
           class="no-pointer-events" />
@@ -22,6 +23,16 @@
 		          	caption>
 		          	<small>{{ item.en }}</small>
 		          </q-item-label>
+        </q-item-section>
+		    <q-item-section>
+          <q-select 
+            outlined 
+            @input="updateItem({ id: id, updates: { status: item.status } })"
+            v-model="item.status" 
+            :value="item.status"
+            :options="statuses" 
+             />
+            {{item.status.name}}
         </q-item-section>
         <q-item-section side>
 		      <q-item-label>
@@ -64,7 +75,8 @@ export default {
     props: ['item', 'id'],
     data () {
       return{
-        showEditItem: false
+        showEditItem: false,
+        statuses: ["to review","ok","learnt"]
       }
     },
     methods: {

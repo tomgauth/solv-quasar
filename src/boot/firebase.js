@@ -1,6 +1,5 @@
 // import something here
 
-
 // "async" is optional
 export default async ({ /* app, router, Vue, ... */ }) => {
   // something to do
@@ -13,6 +12,7 @@ import "firebase/analytics"
 // Add the Firebase products that you want to use
 import "firebase/auth"
 import "firebase/database"
+import "firebase/storage"
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -32,6 +32,8 @@ let firebaseAuth = firebaseApp.auth()
 
 let firebaseDb = firebaseApp.database()
 
-export { firebaseAuth, firebaseDb }
+let firebaseStorage = firebase.storage()
+
+export { firebaseAuth, firebaseDb, firebaseStorage }
 
 firebase.analytics();
