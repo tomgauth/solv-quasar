@@ -1,79 +1,146 @@
 <template>
-<q-card class="my-card" align="center">
+
+<q-card class="q-pt-md" align="center">
+  <div>
+    <p>{{numberOfItemsToReview}}</p>
+  </div>
+
+  <div class="q-pa-md">
+    <q-linear-progress stripe rounded size="20px" :value="progress" color="green" class="q-mt-sm" />
+  </div>
+
+  <div class="chips">
+    
+  </div>
+  <div class="voice interface">
+  
+      <q-btn
+      :loading="loading"
+      :percentage="percentage"
+      border
+      round
+      color="deep-orange"
+      @click="audioPlay(itemToRepeat.audio_url);"
+      icon="play_arrow"
+      />
       <q-card-section> 
-        {{itemToRepeat.en}}
+        <h4>{{itemToRepeat.en}}</h4>
+        <p>{{Answer}}</p>
       </q-card-section>
       <a v-for="(word, key) in wordsPrompt"
         :key="key">
-        <q-chip
-        v-if="wordsAnswer.includes(word)"
-          class="ma-2"
-          color="green"
-          text-color="white">
-          
-          {{word}}
-        </q-chip>
-        <q-chip v-else-if="!wordsAnswer.includes(word)"
-        class="ma-2">...</q-chip>
-      </a>
-      <q-card-section class="q-pa-md">
+        <q-chip v-if="wordsAnswer.includes(word)"
+            class="ma-2"
+            color="green"
+            text-color="white">
+            {{word}}</q-chip>
 
-      <div class="q-gutter-md" style="max-width: 300px">
-        <q-input v-model="Answer" label="Answer" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-             
-            </div>
-          </template>
-        </q-input>
-      </div>
+        <q-chip v-else-if="!wordsAnswer.includes(word) && Answer==''"
+            class="ma-2">...</q-chip>
+        <q-chip v-else-if="!wordsAnswer.includes(word) && !Answer==''"
+            class="ma-2" color="red">???</q-chip>
+      </a>
+      <q-card-section class="q-pa-md">        
       </q-card-section>
       <q-card-actions align="around" >
-        <q-btn color="amber" @click="nextSentence()"  label="Next Sentence" />
+        <q-btn v-if="Answer" round color="secondary" icon="play_arrow"
+          @click="audioPlay(itemToRepeat.student_audio_url)"
+          />
+          <q-btn color="red" label="record" push
+          @mousedown="start(); startRecording();"
+          @mouseup="endSpeechRecognition(); endRecording();"
+          ></q-btn>
+        <q-btn color="amber" @click="nextSentence"  label="Next Sentence" />
         <q-btn color="amber" @click="updateItem({ id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0] , updates: { selected: false } } )" label="Unselect"/>
       </q-card-actions>
+      </div>
     </q-card>
 
 </template>
 <script>
+let SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = SpeechRecognition ? new SpeechRecognition() : false;
+
+const { detect } = require('detect-browser');
+const browser = detect();
+
 import { mapState, mapActions, mapGetters } from 'vuex'
+import { firebaseStorage } from '../../boot/firebase'
+import firebase from 'firebase';
 
 export default {
   props: ['item', 'id'],
   name: 'lesson-test',
   data: () => ({
+    numberOfItemsToReview: 1,
+    loading: false,
+    percentage: 0,
+    storageRef: firebaseStorage.ref(),
     activeClass: "green--text",
-    itemIndex: 0,
     Answer: "",
     toggle: false,
+    browser,
+    isRecording: false,
+    audioRecorder: null,
+    recordingData: [],
+    dataUrl: '',
+    uploadValue: 0,
+    recordingData: [],
+    finalTranscript: "",
+    sourceLanguage: "",
+    recognitionLang: "fr-FR",
+    targetLanguage: "fr",
+    toggle: false,
+    voice: "French Female",
   }),
+  components: {
+    'comprehension' : require('components/Lesson/Comprehension.vue').default,
+    'search' : require('components/List/Tools/Search.vue').default
+  },
   watch: {
         Answer: function () {
         if ((JSON.stringify(this.wordsPrompt) === JSON.stringify(this.wordsAnswer))) {   
           // show all words in green, then success
+          
           setTimeout(this.success, 500)  
         }
-    }
+    },
+  dataUrl() {
+    console.log('dataUrl: ', this.dataUrl)
+    this.togglePlay()
+    // if (this.modelType && this.modelId) {
+    this.submitRecording()
+			// }
+		}
   },
   computed: {
     ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName']),
     ...mapState('items', ['items', 'itemIndex']),
+    progress: function() {
+      
+      let status = (this.itemIndex)/this.numberOfItemsToReview
+      if (status == 0 ) {
+        return 0.05
+      } else {
+        return status
+      }
+    },
     itemToRepeat: {
       get() {
-        //console.log("item: ", Object.entries(this.selectedItems)[this.itemIndex][1])
-
+        console.log('arrayOfItems: ', this.arrayOfItems)
+        console.log('itemToRepeat: ', this.arrayOfItems.filter(item => item[1].selected)[this.itemIndex][1])
         return this.arrayOfItems.filter(item => item[1].selected)[this.itemIndex][1]
 				}
     },
     wordsPrompt:  {
       get() {
-        // return [ "je", "vais", "très", "bien" ]
         return this.itemToRepeat.fr.toLowerCase().replace(/[.,\/#!?$%\^&\*;:{}=\_`~()]/g,"").replace(/\s+/g, " ").split(' ').filter(String)
         
        }
     },
     wordsAnswer: {
-     get() {       
+     get() {            
         return this.Answer.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g,"").replace(/\s+/g, " ").split(' ')
       }
     }
@@ -90,9 +157,9 @@ export default {
       console.log('itemIndex: ',this.itemIndex)
       
       this.Answer = ""
-      if (this.itemIndex < length - 1) {
-        //this.itemIndex = this.itemIndex + 1
-        this.itemIndex += 1
+      if (this.itemIndex < length) {
+        this.incrementIndex()
+        //this.itemIndex += 1
         } else {
           this.itemIndex = 0
           this.$q.dialog({
@@ -114,9 +181,156 @@ export default {
         message: 'Correct answer',
         color: 'secondary'
       })
-    }
-  }
+    },
+    startSpeechRecognition: function() {
 
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = this.recognitionLang;
+      console.log(recognition.lang);
+      console.log(recognition);
+      this.toggle = true;
+
+      recognition.onresult = event => {
+        let interimTranscript = "";
+        for (
+          let i = event.resultIndex, len = event.results.length;
+          i < len;
+          i++
+        ) {
+          let transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        this.Answer = interimTranscript.toLowerCase();
+      };
+      console.log('recognition started: ', recognition.continuous)
+        recognition.start();
+    },
+    endSpeechRecognition: function() {
+      recognition.stop();
+      console.log('end speech recognition')
+      this.toggle = false;
+    },
+    start: function() {
+      this.startSpeechRecognition();
+    },
+    read: function() {
+      console.log(this.voice);
+      return new Promise(resolve => {
+        responsiveVoice.cancel();
+        console.log(this.voice + this.currentSentence.fr);
+        responsiveVoice.speak(this.currentSentence.fr, this.voice);
+      });
+    },
+    startRecording() {
+      this.isRecording = true
+      this.recordingData = []
+      this.dataUrl = ''
+      console.log('dataUrl: ', this.dataUrl)
+      var that = this;
+      console.log('nav: ', navigator)
+      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
+      navigator.getUserMedia({
+        audio: true,
+        video: false
+      }, function (stream) {
+        // that.stream = stream;
+        that.audioRecorder = new MediaRecorder(stream, {
+          mimeType: 'audio/webm'
+          // audioBitsPerSecond: 96000
+        });
+        that.audioRecorder.ondataavailable = function(event) {
+          that.recordingData.push(event.data);
+          console.log('event.data: ', event.data)
+        }
+        that.audioRecorder.onstop = function(event) {
+          console.log('Media recorder stopped');
+          console.log('that.recordingData: ', that.recordingData)
+          var blob = new Blob(that.recordingData, { type: 'audio/webm'});
+          console.log('blob: ', this.blob)
+          that.dataUrl = window.URL.createObjectURL(blob);
+          console.log('dataUrl: ', this.dataUrl)
+        }
+        that.audioRecorder.start();
+        // console.log('Media recorder started');
+      }, (error) => {
+        // console.log(error)
+        this.isRecording = false
+      });
+    },
+    endRecording() {
+      this.isRecording = false
+      if (this.audioRecorder) {
+        this.audioRecorder.stop();
+      }
+    },
+    removeRecording() {
+    },
+    togglePlay() {
+      var audio = new Audio();
+      audio.src = this.dataUrl
+      if (audio.paused === false) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      // var audioElement = this.$refs.audio
+      // if (audioElement.paused === false) {
+      //   audioElement.pause();
+      // } else {
+      //   audioElement.play();
+      // }
+    },
+    audioPlay(url) {
+      var audio = new Audio();
+      audio.src = url
+      if (audio.paused === false) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+    },
+        async submitRecording() {
+        console.log("submit Recording")
+        var blob = new Blob(this.recordingData , { type: 'audio/webm'});
+        console.log('blob: ',{blob});
+        console.log('itemToRepeat.student_audio_urlr: ',this.itemToRepeat.student_audio_url)
+        let fileName = Date.now();
+        console.log('fileName: ', fileName)
+        const storageRef = firebase.storage().ref().child(`${fileName}`).put(blob)
+        console.log('storageRef: ',storageRef)
+        // storageRef = storageRef.put(blob)
+        // console.log('storageRef.put(blob): ', storageRef)
+
+        storageRef.on(`state_changed`,snapshot=>{
+            this.uploadValue = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+          }, error=>{console.log('error: ',error.message)},
+          ()=>{
+            this.uploadValue=100;
+            storageRef.snapshot.ref.getDownloadURL().then((url)=>{ 
+              this.itemToRepeat.student_audio_url = url;
+              console.log('this.itemToRepeat.student_audio_url : ',this.itemToRepeat.student_audio_url)
+              this.$emit('update:this.itemToRepeat.student_audio_url', url) // this.audio_url
+              console.log('url: ', url)
+            });
+          }
+      );
+      // formData.append('audio[file]', blob);
+      // formData.append('audio[duration]', duration);
+      // formData.append(this.modelType.toLowerCase(), this.modelId);
+      // formData.append('audio[filename]', (this.text || 'file').toLowerCase().replace(/[\s?!'"]+/g, '_'));
+      //this.$http.post(`/audios`, formData).then( (res) => {
+      //  this.$emit('audio-created', res.body.data.attributes)
+      //})
+    },
+  },
+  mounted: function () {
+    this.numberOfItemsToReview = this.arrayOfItems.filter(item => item[1].selected).length
+  }
 }
 
 </script>

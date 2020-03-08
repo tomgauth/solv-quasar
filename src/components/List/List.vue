@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <search />
+    <search />    
 		<q-list
       v-if="Object.keys(items).length"
 			separator

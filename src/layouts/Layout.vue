@@ -55,7 +55,6 @@
             <q-item-label>{{ nav.label }}</q-item-label>
           </q-item-section>
         </q-item>
-        </q-item>
       </q-list>
     </q-drawer>
 

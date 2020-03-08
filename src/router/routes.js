@@ -7,19 +7,23 @@ const routes = [
       { 
         path: '', 
         component: () => import('pages/PageLesson.vue') 
-    }, 
-    { 
-      path: '/settings', 
-      component: () => import('pages/PageSettings.vue') 
-  },
-  { 
-    path: '/auth', 
-    component: () => import('pages/PageAuth.vue') 
-  },
-  { 
-    path: '/list', 
-    component: () => import('pages/PageList.vue') 
-  }
+      }, 
+      { 
+        path: '/settings', 
+        component: () => import('pages/PageSettings.vue') 
+      },
+      { 
+        path: '/auth', 
+        component: () => import('pages/PageAuth.vue') 
+      },
+      { 
+        path: '/list', 
+        component: () => import('pages/PageList.vue') 
+      },
+      { 
+        path: '/table', 
+        component: () => import('pages/PageTable.vue') 
+      }
     ]
   }
 ]

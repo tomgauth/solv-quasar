@@ -5,11 +5,16 @@
         @submit="submitForm">
         <q-card-section>
             <modal-item-fr 
-            :fr.sync="itemToSubmit.fr"
-            ref="modalItemName"/>
-            <modal-item-en :en.sync="itemToSubmit.en"/>
+                :fr.sync="itemToSubmit.fr"
+                ref="modalItemName"/>
+            <modal-item-en 
+                :en.sync="itemToSubmit.en"/>
+            <record-button
+			  :audio_url.sync="itemToSubmit.audio_url"
+			  ref="RecordButton"></record-button>
         </q-card-section>
         <modal-buttons/>
+        <pre>{{ itemToSubmit.audio_url }}</pre>
         <pre>{{ itemToSubmit }}</pre>
     </q-form>
         </q-card>
@@ -17,11 +22,13 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { firebaseStorage } from '../../../boot/firebase'
 
 export default {
     data () {
         return {
             itemToSubmit: {
+                audio_url:"",
                 day:"", 
                 type:"", 
                 block_number:"", 
@@ -30,7 +37,8 @@ export default {
                 en: "", 
                 words: [],
                 selected:false
-            }
+            },
+            storageRef: firebaseStorage.ref(),
         }
     },
     methods:{
@@ -53,7 +61,8 @@ export default {
         'modal-header': require('components/List/Modals/Shared/ModalHeader').default,
         'modal-item-fr': require('components/List/Modals/Shared/ModalItemFrench').default,
         'modal-item-en': require('components/List/Modals/Shared/ModalItemEnglish').default,
-        'modal-buttons': require('components/List/Modals/Shared/ModalButtons').default
+        'modal-buttons': require('components/List/Modals/Shared/ModalButtons').default,
+        'record-button': require('components/List/Modals/Shared/RecordButton').default
     }
 }
 </script>

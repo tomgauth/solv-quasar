@@ -32,11 +32,18 @@
             :value="item.status"
             :options="statuses" 
              />
-            {{item.status.name}}
         </q-item-section>
         <q-item-section side>
 		      <q-item-label>
             <div class="row">
+            <q-btn
+              :loading="loading"
+              :percentage="percentage"
+              round
+              color="deep-orange"
+              @click="simulateProgress(); playAudio(item.name);"
+              icon="play_arrow"
+              />
             <q-btn 
               @click.stop="showEditItem = true"
               flat 
@@ -70,17 +77,42 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
+import { firebaseStorage } from '../../boot/firebase'
 
 export default {
     props: ['item', 'id'],
     data () {
       return{
+        storageRef: firebaseStorage.ref(),
+        loading: false,
+        percentage: 0,
         showEditItem: false,
         statuses: ["to review","ok","learnt"]
       }
     },
     methods: {
       ...mapActions('items', ['updateItem', 'deleteItem']),
+      	playAudio (itemID) {
+          console.log(this.item.audio_url)
+          var audio = new Audio(this.item.audio_url)
+          audio.play().catch(function(error) {
+            console.error()
+          });
+        },
+        simulateProgress () {
+          // we set loading state
+
+          this.loading = true
+          this.percentage = 0
+
+          this.interval = setInterval(() => {
+            this.percentage += Math.floor(10)
+            if (this.percentage >= 100) {
+              clearInterval(this.percentage)
+              this.loading = false
+            }
+          }, 300)
+        },
       promptToDelete(id) {
           this.$q.dialog({
             title: 'Confirm',

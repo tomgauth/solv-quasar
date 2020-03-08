@@ -14,9 +14,12 @@
 	    		ref="modalItemEnglish" />
 
 		    <p> {{itemToSubmit.name}} </p>
-			
-			<button @click.prevent="downloadUrl(itemToSubmit.name)">download</button>
-			<button @click.prevent="playSound('https://firebasestorage.googleapis.com/v0/b/solv-quasar-french.appspot.com/o/6af9e11e-2841-e96f-6cf4-91b694d60e96.mp3?alt=media&token=d0e47386-309c-43e2-943a-854a2325b9f0')">play</button>
+			<p> {{itemToSubmit.audio_url}} </p>
+		
+			<!-- <modal-upload></modal-upload> -->
+			<record-button
+			  :audio_url.sync="itemToSubmit.audio_url"
+			  ref="RecordButton"></record-button>
 
 	    </q-card-section>
 
@@ -24,8 +27,7 @@
 
 		</form>
 
-		<!-- <q-uploader :firebase-storage="storageRef"/>  -->
-		<!-- <button @click="onUpload">Upload</button> -->
+
 
   </q-card>
 </template>
@@ -45,25 +47,6 @@ export default {
         }
     },
 		methods: {
-			downloadUrl (itemID) {
-				this.storageRef.child('ID'+itemID+'.mp3').getDownloadURL().then(function(url) {
-					// `url` is the download URL for 'images/stars.jpg'
-					console.log(url)
-					var audio = new Audio(url)
-					audio.play()
-					}).catch(function(error) {
-				// Handle any errors
-				});
-			},
-			playSound (sound) {
-				console.log(this.storageRef.child('IDL001COM001.mp3'))
-				console.log('gsReference: ', this.gsReference)
-				this.gsReference.getDownloadURL()
-				if(sound) {
-					var audio = new Audio(sound);
-					audio.play();
-				}
-			},
 			...mapActions('items', ['updateItem']),
 			// onUpload() {
 			// 	const storageRef = firebaseStorage.ref(`${this.audioData.name}`).put(this.audioData);
@@ -86,7 +69,9 @@ export default {
         'modal-header': require('components/List/Modals/Shared/ModalHeader').default,
         'modal-item-fr': require('components/List/Modals/Shared/ModalItemFrench').default,
         'modal-item-en': require('components/List/Modals/Shared/ModalItemEnglish').default,
-        'modal-buttons': require('components/List/Modals/Shared/ModalButtons').default
+		'modal-buttons': require('components/List/Modals/Shared/ModalButtons').default,
+		'modal-upload': require('components/List/Modals/Shared/ModalUpload').default,
+		'record-button': require('components/List/Modals/Shared/RecordButton').default
     },
     mounted() {
         this.itemToSubmit = Object.assign({}, this.item)
