@@ -1,7 +1,16 @@
 <template>
-  <q-page padding class="flex flex-center">
-    <lesson-test/>
-  </q-page>
+  <div class="q-pa-md">
+    <div class="row">
+      <div class="col">
+      </div>
+      <div class="col-6">
+        <lesson-test/>
+      </div>
+      <div class="col">
+      </div>
+    </div>
+    
+  </div>
 </template>
 
 <script>

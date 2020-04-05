@@ -2,7 +2,9 @@
 
 <q-card class="q-pt-md" align="center">
   <div>
-    <p>{{numberOfItemsToReview}}</p>
+    <p>{{dueItems}}</p>
+    <p>{{itemIndex}}/{{numberOfItemsToReview}}</p>
+    <p>{{itemToRepeat.date}}</p>
   </div>
 
   <div class="q-pa-md">
@@ -14,18 +16,11 @@
   </div>
   <div class="voice interface">
   
-      <q-btn
-      :loading="loading"
-      :percentage="percentage"
-      border
-      round
-      color="deep-orange"
-      @click="audioPlay(itemToRepeat.audio_url);"
-      icon="play_arrow"
-      />
       <q-card-section> 
         <h4>{{itemToRepeat.en}}</h4>
-        <p>{{Answer}}</p>
+        
+        <p>Next review is due {{moment(itemToRepeat.date, "").calendar()}}</p>
+
       </q-card-section>
       <a v-for="(word, key) in wordsPrompt"
         :key="key">
@@ -40,18 +35,44 @@
         <q-chip v-else-if="!wordsAnswer.includes(word) && !Answer==''"
             class="ma-2" color="red">???</q-chip>
       </a>
-      <q-card-section class="q-pa-md">        
-      </q-card-section>
-      <q-card-actions align="around" >
-        <q-btn v-if="Answer" round color="secondary" icon="play_arrow"
-          @click="audioPlay(itemToRepeat.student_audio_url)"
-          />
-          <q-btn color="red" label="record" push
+      <q-card-actions align="around">
+        <q-btn focus 
+          size="xl"
+          color="red" icon="mic" round push
           @mousedown="start(); startRecording();"
           @mouseup="endSpeechRecognition(); endRecording();"
+          ></q-btn> 
+      </q-card-actions>
+      <q-card-actions align="around">  
+        <q-btn 
+          v-if="Answer" 
+          round 
+          color="secondary" 
+          icon="play_arrow"
+          @click="audioPlay(itemToRepeat.student_audio_url)"
+        /> 
+        <q-btn
+          v-if="Answer == itemToRepeat.fr"
+          :loading="loading"
+          :percentage="percentage"
+          border
+          round
+          color="green"
+          @click="audioPlay(itemToRepeat.audio_url);"
+          icon="hearing"
+        />
+      </q-card-actions>
+      <q-card-actions v-if="Answer" align="around" >
+        <q-btn
+          color="blue"
+          label="show answer"
+          @click="showAnswer"
           ></q-btn>
-        <q-btn color="amber" @click="nextSentence"  label="Next Sentence" />
-        <q-btn color="amber" @click="updateItem({ id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0] , updates: { selected: false } } )" label="Unselect"/>
+
+        <q-btn color="red" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'bad' } })" icon="clear" label="wrong" />
+        <q-btn color="yellow" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'ok' } })" label="ok" />
+        <q-btn color="green" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'good' } })"  icon="done" label="good" />
+          
       </q-card-actions>
       </div>
     </q-card>
@@ -64,10 +85,13 @@ let recognition = SpeechRecognition ? new SpeechRecognition() : false;
 
 const { detect } = require('detect-browser');
 const browser = detect();
+const moment = require('moment');
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { firebaseStorage } from '../../boot/firebase'
 import firebase from 'firebase';
+import {date} from 'quasar'
+
 
 export default {
   props: ['item', 'id'],
@@ -78,9 +102,10 @@ export default {
     percentage: 0,
     storageRef: firebaseStorage.ref(),
     activeClass: "green--text",
-    Answer: "",
+    Answer: " ",
     toggle: false,
     browser,
+    moment,
     isRecording: false,
     audioRecorder: null,
     recordingData: [],
@@ -100,6 +125,8 @@ export default {
   },
   watch: {
         Answer: function () {
+          console.log('Date(this.itemToRepeat.next_review) : ',Date.parse(this.itemToRepeat.next_review))
+          console.log('time : ', Date(this.itemToRepeat.next_review)-Date.parse(Date.now()))
         if ((JSON.stringify(this.wordsPrompt) === JSON.stringify(this.wordsAnswer))) {   
           // show all words in green, then success
           
@@ -115,7 +142,7 @@ export default {
 		}
   },
   computed: {
-    ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName']),
+    ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName', 'dueItems']),
     ...mapState('items', ['items', 'itemIndex']),
     progress: function() {
       
@@ -124,6 +151,14 @@ export default {
         return 0.05
       } else {
         return status
+      }
+    },
+    sessionItems : {
+      get() {
+        console.log('moment : ', moment())
+        console.log('is it due? ', moment(this.arrayOfItems[0][1].date) <= moment())
+        console.log('sessionItems', this.arrayOfItems.filter(item => item[1].selected || moment(item[1].date) <= moment()))
+        return this.arrayOfItems.filter(item => item[1].selected)
       }
     },
     itemToRepeat: {
@@ -147,6 +182,10 @@ export default {
   },
   methods: {
     ...mapActions('items', ['updateItem', 'incrementIndex']),
+    ...mapActions('srs', ['increaseInterval','log', 'schedule']),
+    showAnswer() {
+      this.Answer = this.itemToRepeat.fr
+    },
     nextSentence: function () {
       //if no nextSentence, session is done
       let selectedItems = this.arrayOfItems.filter(item => item[1].selected)
@@ -268,8 +307,6 @@ export default {
         this.audioRecorder.stop();
       }
     },
-    removeRecording() {
-    },
     togglePlay() {
       var audio = new Audio();
       audio.src = this.dataUrl
@@ -278,12 +315,6 @@ export default {
       } else {
         audio.play();
       }
-      // var audioElement = this.$refs.audio
-      // if (audioElement.paused === false) {
-      //   audioElement.pause();
-      // } else {
-      //   audioElement.play();
-      // }
     },
     audioPlay(url) {
       var audio = new Audio();
@@ -318,14 +349,7 @@ export default {
               console.log('url: ', url)
             });
           }
-      );
-      // formData.append('audio[file]', blob);
-      // formData.append('audio[duration]', duration);
-      // formData.append(this.modelType.toLowerCase(), this.modelId);
-      // formData.append('audio[filename]', (this.text || 'file').toLowerCase().replace(/[\s?!'"]+/g, '_'));
-      //this.$http.post(`/audios`, formData).then( (res) => {
-      //  this.$emit('audio-created', res.body.data.attributes)
-      //})
+      )
     },
   },
   mounted: function () {

@@ -14,8 +14,6 @@
 			  ref="RecordButton"></record-button>
         </q-card-section>
         <modal-buttons/>
-        <pre>{{ itemToSubmit.audio_url }}</pre>
-        <pre>{{ itemToSubmit }}</pre>
     </q-form>
         </q-card>
 </template>
@@ -29,13 +27,13 @@ export default {
         return {
             itemToSubmit: {
                 audio_url:"",
-                day:"", 
-                type:"", 
-                block_number:"", 
                 name:"", 
                 fr: "", 
                 en: "", 
-                words: [],
+                state:"new",
+                date:"",
+                student_audio_url:"",
+                concepts: [],
                 selected:false
             },
             storageRef: firebaseStorage.ref(),

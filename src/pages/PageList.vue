@@ -5,7 +5,14 @@
       color="primary" 
       icon="add" 
       label="Add a sentence" />
-    <list/>
+
+      <q-btn 
+      @click="populateItems"
+      color="red" 
+      icon="arrow_upwards" 
+      label="populate items" />
+    <list-table/>
+    
     <q-dialog v-model="showAddItem">
       <add-item @close="showAddItem = false" />
     </q-dialog> 
@@ -13,7 +20,7 @@
 </template>
 
 <script>
-//import { mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 export default {
     data () {
     return {
@@ -22,7 +29,12 @@ export default {
   },
   components: {
       'list' : require('components/List/List.vue').default,
-      'add-item' : require('components/List/Modals/AddItem.vue').default
+      'add-item' : require('components/List/Modals/AddItem.vue').default,
+      'list-table' : require('components/List/Table.vue').default
+  },
+  methods: {
+    ...mapActions('items', ['populateItems']),
+    ...mapActions('srs', ['log', 'calculate'])
   }
 
 }

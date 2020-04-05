@@ -24,6 +24,13 @@
 		          	<small>{{ item.en }}</small>
 		          </q-item-label>
         </q-item-section>
+          <q-item-section>
+        <q-item-label
+                  caption>
+          <small> {{ moment(item.next_review).calendar() }}</small>
+
+        </q-item-label>
+        </q-item-section>
 		    <q-item-section>
           <q-select 
             outlined 
@@ -78,11 +85,13 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { firebaseStorage } from '../../boot/firebase'
+const moment = require('moment');
 
 export default {
     props: ['item', 'id'],
     data () {
       return{
+        moment,
         storageRef: firebaseStorage.ref(),
         loading: false,
         percentage: 0,

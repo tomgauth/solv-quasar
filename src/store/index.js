@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import items from './store-items'
 import words from './store-words'
+import srs from './srs'
 
 import auth from './store-auth.js'
 // import { auth } from 'firebase'
@@ -42,7 +43,8 @@ export default function (/* { ssrContext } */) {
       // example
       auth,
       items,
-      words
+      words,
+      srs
     },
 
     // enable strict mode (adds overhead!)

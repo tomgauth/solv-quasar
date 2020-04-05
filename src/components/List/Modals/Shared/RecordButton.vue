@@ -1,6 +1,6 @@
 <template>
               <q-btn 
-			  		 
+			  		 push
 			  		 color="red" label="record" 
                      @mousedown="startRecording"
                      @mouseup="endRecording"
