@@ -17,6 +17,13 @@
     </template>
   </q-input>
 </template>
+
+   <q-toggle 
+      color="yellow"
+      val="lg"
+      label="select sentences to review"
+      v-model="selectReview"    />
+
         <q-table
           v-if="Object.keys(arrayOfItems).length"
           row-key="fr"
@@ -74,6 +81,7 @@
             </q-td>
           </template>
         </q-table>
+        
 </q-page>
 </template>
 
@@ -87,6 +95,7 @@ data(){
 return {
     moment,
     showAddItem: false,
+    selectReview: false,
     selected: [],
     loading: false,
     filter: '',
@@ -151,10 +160,22 @@ methods: {
     return data
   }
 },
-computed: {
-  ...mapState('items', ['items', 'search']),
-  ...mapGetters('items', ['arrayOfItems'])
-},
+  computed: {
+    ...mapState('items', ['items', 'search']),
+    ...mapGetters('items', ['arrayOfItems']),
+  },
+  watch: {
+      selectReview: function(value, oldValue) {
+        if (value) {
+          // for each item in items
+          // if item.date < Date.now()
+          //  item.selected = true
+        }
+        console.log("selectReview")
+        console.log("value : ", value)
+        console.log("oldValue : ", oldValue)
+  }
+  },
 components: {
 'item' : require('components/List/Item.vue').default,
 'add-item' : require('components/List/Modals/AddItem.vue').default,

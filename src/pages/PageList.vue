@@ -5,7 +5,7 @@
       color="primary" 
       icon="add" 
       label="Add a sentence" />
-
+ 
       <q-btn 
       @click="populateItems"
       color="red" 
@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     ...mapActions('items', ['populateItems']),
-    ...mapActions('srs', ['log', 'calculate'])
+    ...mapActions('srs', ['log', 'calculate']),
   }
 
 }
