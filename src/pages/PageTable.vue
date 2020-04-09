@@ -9,6 +9,7 @@
     <q-dialog v-model="showAddItem">
       <add-item @close="showAddItem = false" />
     </q-dialog> 
+    
   </q-page>
 </template>
 

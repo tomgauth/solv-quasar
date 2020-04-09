@@ -71,8 +71,7 @@
 
         <q-btn color="red" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'bad' } })" icon="clear" label="wrong" />
         <q-btn color="yellow" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'ok' } })" label="ok" />
-        <q-btn color="green" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'good' } })"  icon="done" label="good" />
-          
+        <q-btn color="green" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'good' } })"  icon="done" label="good" />        
       </q-card-actions>
       </div>
     </q-card>
@@ -181,7 +180,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('items', ['updateItem', 'incrementIndex']),
+    ...mapActions('items', ['updateItem', 'incrementIndex', 'selectDueItems']),
     ...mapActions('srs', ['increaseInterval','log', 'schedule']),
     showAnswer() {
       this.Answer = this.itemToRepeat.fr

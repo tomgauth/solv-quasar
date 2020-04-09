@@ -64,6 +64,24 @@ const actions = {
 	incrementIndex({ commit }) {
 		commit('incrementIndex')
 	}, 
+	selectDueItems({ dispatch }, originalPayload) {
+		console.log("selectDueItems value : ", originalPayload)
+		console.log("getters.dueItems : ", getters.dueItems(state))
+		let arrayDueItems = getters.dueItems(state)
+		let updates = {selected:''}
+		let itemPayload = {id:'', updates}
+		Object.entries(arrayDueItems).forEach(dueItem => {
+			console.log('item[1].selected :',dueItem[1].selected)
+			itemPayload.id = dueItem[0]
+			console.log('value :', originalPayload)
+			itemPayload.updates.selected = originalPayload
+			console.log('itemPayload :', itemPayload)
+			dispatch('fbUpdateItem', itemPayload)
+			//Object.assign(state.items[itemPayload.id], itemPayload.updates)
+		});
+
+
+	},
 	populateItems( {commit, dispatch} ) {
 
 		let initialData = firebaseDb.ref('initial_data')
@@ -153,7 +171,7 @@ const getters = {
 		
 	},
 	arrayOfItems: (state) => {
-		console.log(Object.entries(state.items))
+		console.log('arrayOfItems:',Object.entries(state.items))
 		return Object.entries(state.items)
 	},
 	getItemByName: state => name => {

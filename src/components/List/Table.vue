@@ -16,13 +16,8 @@
       <q-icon name="search" />
     </template>
   </q-input>
+  
 </template>
-
-   <q-toggle 
-      color="yellow"
-      val="lg"
-      label="select sentences to review"
-      v-model="selectReview"    />
 
         <q-table
           v-if="Object.keys(arrayOfItems).length"
@@ -87,7 +82,7 @@
 
 <script>
 
-import { mapState, mapGetters } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 const moment = require('moment')
 
 export default {
@@ -95,7 +90,6 @@ data(){
 return {
     moment,
     showAddItem: false,
-    selectReview: false,
     selected: [],
     loading: false,
     filter: '',
@@ -162,19 +156,14 @@ methods: {
 },
   computed: {
     ...mapState('items', ['items', 'search']),
-    ...mapGetters('items', ['arrayOfItems']),
+    ...mapActions('items', ['selectDueItems']),
+    ...mapGetters('items', ['arrayOfItems', 'dueItems']),
   },
   watch: {
-      selectReview: function(value, oldValue) {
-        if (value) {
-          // for each item in items
-          // if item.date < Date.now()
-          //  item.selected = true
-        }
-        console.log("selectReview")
-        console.log("value : ", value)
-        console.log("oldValue : ", oldValue)
-  }
+  //     selectReview: function(value, oldValue) {
+  //       console.log('selectReview: function(value) :', value)
+  //       console.log('selectReview: function(oldValue) :', oldValue)
+  // }
   },
 components: {
 'item' : require('components/List/Item.vue').default,
