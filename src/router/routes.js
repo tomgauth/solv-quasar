@@ -13,10 +13,6 @@ const routes = [
         component: () => import('pages/PageSettings.vue') 
       },
       { 
-        path: '/auth', 
-        component: () => import('pages/PageAuth.vue') 
-      },
-      { 
         path: '/list', 
         component: () => import('pages/PageList.vue') 
       },
@@ -25,7 +21,17 @@ const routes = [
         component: () => import('pages/PageTable.vue') 
       }
     ]
-  }
+  },
+  { 
+    path: '/auth', 
+    component: () => import('layouts/NoHeader.vue'),
+    children:[
+      {
+        path:'',
+        component:() => import('pages/PageAuth.vue')
+      }
+    ] 
+  },
 ]
 
 // Always leave this as last one

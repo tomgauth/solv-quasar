@@ -1,15 +1,9 @@
 <template>
     <form @submit.prevent="submitForm">
-        <div class="row q-mb-md">
-            <q-banner class="bg-grey-3 col">
-            <template v-slot:avatar>
-                <q-icon name="account_circle" color="primary" />
-            </template>
+        <div class="row q-mb-lg text-body2">
             {{ tab | titleCase }} to start learning
-            </q-banner>
-            
         </div>
-        <div class="row q-mb-md">
+        <div class="row q-my-xs q-mt-md">
             <q-input outlined 
                 class="col"
                 v-model="formData.email" 
@@ -37,7 +31,9 @@
             <q-btn 
                 color="primary" 
                 :label="tab" 
-                type="submit"/>
+                type="submit"
+                outline
+                />
         </div>
     </form>
 </template>

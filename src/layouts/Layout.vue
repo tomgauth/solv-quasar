@@ -66,7 +66,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { openURL } from 'quasar'
+
 export default {
   name: 'MyLayout',
 
@@ -96,8 +96,7 @@ export default {
     ...mapState('auth', ['loggedIn'])
   },
   methods: {
-    ...mapActions('auth', ['logoutUser'] ),
-    openURL
+    ...mapActions('auth', ['logoutUser'] )
   }
 }
 </script>
