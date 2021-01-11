@@ -5,16 +5,16 @@ const routes = [
     component: () => import('layouts/Layout.vue'),
     children: [
       { 
-        path: '', 
-        component: () => import('pages/PageLesson.vue') 
+        path: '/lesson-start', 
+        component: () => import('pages/lesson-start.vue'), 
+      }, 
+      { 
+        path: '/lesson-play', 
+        component: () => import('pages/lesson-play.vue'), 
       }, 
       { 
         path: '/settings', 
         component: () => import('pages/PageSettings.vue') 
-      },
-      { 
-        path: '/list', 
-        component: () => import('pages/PageList.vue') 
       },
       { 
         path: '/table', 
