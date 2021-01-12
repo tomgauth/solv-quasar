@@ -20,12 +20,17 @@
 </template>
 
 <script>
+import { firebaseStorage } from '../../src/boot/firebase'
+
 export default {
   // name: 'PageName',
   data(){
     return {
       
     }
+  },
+  mounted(){
+    this.$store.dispatch("playlist/populateCurrentQueue");
   }
 }
 </script>

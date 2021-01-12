@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import items from './store-items'
 import words from './store-words'
 import srs from './srs'
+import playlist from './playlist-state';
 
 import auth from './store-auth.js'
 // import { auth } from 'firebase'
@@ -43,7 +44,8 @@ export default function (/* { ssrContext } */) {
       auth,
       items,
       words,
-      srs
+      srs,
+      playlist
     },
 
     // enable strict mode (adds overhead!)
