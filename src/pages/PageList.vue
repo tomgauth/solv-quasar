@@ -16,7 +16,7 @@
       color="yellow"
       val="lg"
       label="select sentences to review"
-      v-model="dueItemsSelected"      
+      v-model="reviewDueItemsStatus"     
       />
     <list-table/>
     
@@ -27,13 +27,11 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 export default {
     data () {
     return {
-      showAddItem: false,
-      dueItemsSelected: false
-    }
+      showAddItem: false    }
   },
   components: {
       'list' : require('components/List/List.vue').default,
@@ -41,14 +39,28 @@ export default {
       'list-table' : require('components/List/Table.vue').default
   },
   watch: {
-    dueItemsSelected: function(value, oldValue) {
-      this.selectDueItems(value)
-    }
+    // dueItemsSelected: function(value, oldValue) {
+    //   console.log(dueItemsSelected)
+    //   this.selectDueItems(value)
+    // }
   },
   methods: {
     ...mapActions('items', ['populateItems', 'selectDueItems']),
     ...mapActions('srs', ['log', 'calculate']),
-  }
+    },
+  computed: {
+    ...mapState('items', ['reviewDueItems']),
+    reviewDueItemsStatus: {
+        get() {
+          console.log('this.reviewDueItems : ', this.reviewDueItems)
+          return this.reviewDueItems
+        },
+        set() {
+            console.log('value set(value) :', this.reviewDueItems)
+              this.selectDueItems(!this.reviewDueItems)        
+        }
+      }
+    }
 
 }
 </script>

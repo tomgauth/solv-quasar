@@ -2,24 +2,27 @@
 
 <q-card class="q-pt-md" align="center">
   <div>
-    <p>{{dueItems}}</p>
-    <p>{{itemIndex}}/{{numberOfItemsToReview}}</p>
-    <p>{{itemToRepeat.date}}</p>
+    <p>{{lessonItems}}</p>
+    <q-btn
+      class="ma-2"
+      color="green"
+      label="index +3 ()"
+      @click="increaseIndex()"
+    />
+    <p>0/{{numberOfItemsToReview}}</p>
   </div>
 
   <div class="q-pa-md">
     <q-linear-progress stripe rounded size="20px" :value="progress" color="green" class="q-mt-sm" />
   </div>
 
-  <div class="chips">
-    
-  </div>
   <div class="voice interface">
   
       <q-card-section> 
         <h4>{{itemToRepeat.en}}</h4>
         
         <p>Next review is due {{moment(itemToRepeat.date, "").calendar()}}</p>
+        
 
       </q-card-section>
       <a v-for="(word, key) in wordsPrompt"
@@ -67,11 +70,10 @@
           color="blue"
           label="show answer"
           @click="showAnswer"
-          ></q-btn>
-
-        <q-btn color="red" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'bad' } })" icon="clear" label="wrong" />
-        <q-btn color="yellow" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'ok' } })" label="ok" />
-        <q-btn color="green" @click="schedule({id: arrayOfItems.filter(item => item[1].selected)[itemIndex][0], updates: { date: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].date, state: arrayOfItems.filter(item => item[1].selected)[itemIndex][1].state, grade: 'good' } })"  icon="done" label="good" />        
+          ></q-btn>        
+        <q-btn color="red" @click="increaseIndex();schedule({id: itemToRepeatID, updates: { date: itemToRepeat.state, grade: 'bad' } })" icon="clear" label="wrong" />
+        <q-btn color="yellow" @click="increaseIndex();schedule({id: itemToRepeatID, updates: { date: itemToRepeat.state, grade: 'ok' } })" label="ok" />
+        <q-btn color="green" @click="schedule({id: itemToRepeatID, updates: { date: itemToRepeat.state, grade: 'good' } })"  icon="done" label="good" />        
       </q-card-actions>
       </div>
     </q-card>
@@ -141,8 +143,9 @@ export default {
 		}
   },
   computed: {
-    ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName', 'dueItems']),
-    ...mapState('items', ['items', 'itemIndex']),
+    ...mapGetters('items', ['items', 'arrayOfItems','lessonItems', 'getItemByName', 'dueItems']),
+    ...mapState('items', ['items']),
+
     progress: function() {
       
       let status = (this.itemIndex)/this.numberOfItemsToReview
@@ -155,18 +158,30 @@ export default {
     sessionItems : {
       get() {
         console.log('moment : ', moment())
-        console.log('is it due? ', moment(this.arrayOfItems[0][1].date) <= moment())
-        console.log('sessionItems', this.arrayOfItems.filter(item => item[1].selected || moment(item[1].date) <= moment()))
-        return this.arrayOfItems.filter(item => item[1].selected)
+        console.log('is it due? ', moment(this.lessonItems[0][1].date) <= moment())
+        console.log('sessionItems', this.lessonItems.filter(item => item[1].selected || moment(item[1].date) <= moment()))  
+             var i
+             for (i = 0; i < this.lessonItems.length; i++) {
+              this.lessonItems[i][1].review_index = i
+              console.log("lessonItems[i][1].review_index : ", this.lessonItems[i][1].review_index)
+             }
+        return this.lessonItems.filter(item => item[1].selected)
       }
     },
     itemToRepeat: {
       get() {
+        console.log('lessonItems: ', this.lessonItems)
         console.log('arrayOfItems: ', this.arrayOfItems)
-        console.log('itemToRepeat: ', this.arrayOfItems.filter(item => item[1].selected)[this.itemIndex][1])
-        return this.arrayOfItems.filter(item => item[1].selected)[this.itemIndex][1]
+        console.log('itemToRepeat: ', this.arrayOfItems.filter(item => item[1].selected)[0][1])
+        return this.sessionItems[0][1]
 				}
     },
+    itemToRepeatID: {
+          get(){
+            console.log('this.arrayOfItems.filter(item => item[1].selected)[itemIndex][0] : ',this.arrayOfItems.filter(item => item[1].selected)[0][0])
+            return this.arrayOfItems.filter(item => item[1].selected)[0][0]
+          }
+        },
     wordsPrompt:  {
       get() {
         return this.itemToRepeat.fr.toLowerCase().replace(/[.,\/#!?$%\^&\*;:{}=\_`~()]/g,"").replace(/\s+/g, " ").split(' ').filter(String)
@@ -180,7 +195,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('items', ['updateItem', 'incrementIndex', 'selectDueItems']),
+    ...mapActions('items', ['updateItem', 'increaseIndex', 'selectDueItems']),
     ...mapActions('srs', ['increaseInterval','log', 'schedule']),
     showAnswer() {
       this.Answer = this.itemToRepeat.fr

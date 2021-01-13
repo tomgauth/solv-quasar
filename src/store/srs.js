@@ -1,13 +1,3 @@
-import  MS from 'memory-scheduler';
-// instead, use : https://github.com/vincaslt/spaced-repetition#readme
-
-
-// const DAY_IN_MINISECONDS = 24 * 60 * 60 * 1000;
-
-// const today = Math.round(new Date().getTime() / DAY_IN_MINISECONDS);
-
-// const ms = new MS([1, 2, 3, 8, 17], [-3, -1, 1]);
-
 import SpacedRepetition from 'spaced-repetition'
 
 const config = {
@@ -66,12 +56,14 @@ const actions = {
 			id: originPayload.id,
 			updates : {
 				state: itemToSchedule.state,
-				date: itemToSchedule.date
+				date: itemToSchedule.date,
+				review_index: itemNextReview
 			}
 		}
 		dispatch('items/fbUpdateItem', payload, {root:true})
 		
 	},
+
 	increaseInterval({ dispatch }, originPayload) {
 
 		// change the payload here to a fixed value

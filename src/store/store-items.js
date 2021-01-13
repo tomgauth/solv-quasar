@@ -1,15 +1,16 @@
 import { firebaseDb, firebaseAuth } from 'boot/firebase'
 import Vue from 'vue'
 import { uid } from 'quasar'
-import moment from 'moment'
-// import { longStackSupport } from 'q'
+import moment, { relativeTimeRounding } from 'moment'
 
 const state = {
     items: {
 
 	},
+	lessonItems: [],
 	search: '',
-	itemIndex: 0
+	itemIndex: 0,
+	reviewDueItems: 'false'
 }
 
 
@@ -34,11 +35,31 @@ const mutations = {
 	incrementIndex(state) {
 		console.log("state.itemIndex: ", state.itemIndex)
 		state.itemIndex += 1
-	}
+	},
+	selectDueItems(state, value) {
+		state.reviewDueItems = value
+	},
+	increaseIndex(state) {
+		// this function will move the item if it's still scheduled for the day
+		function arraymove(arr, fromIndex, toIndex) {
+			var element = arr[fromIndex];
+			arr.splice(fromIndex, 1);
+			arr.splice(toIndex, 0, element);
+			return arr
+		}
+
+		let updatedLessonItems = arraymove(state.lessonItems, 0, 3)
+		state.lessonItems = updatedLessonItems
+		console.log('updatedLessonItems :', updatedLessonItems)
+
+	}, 
 }
 
 
 const actions = {
+	increaseIndex( { dispatch }) {
+		dispatch('increaseIndex')
+	},
 	updateItem({ dispatch }, payload) {
 		console.log('actions / update Item triggered : ', payload)
 		dispatch('fbUpdateItem', payload)
@@ -64,7 +85,7 @@ const actions = {
 	incrementIndex({ commit }) {
 		commit('incrementIndex')
 	}, 
-	selectDueItems({ dispatch }, originalPayload) {
+	selectDueItems({ dispatch, commit }, originalPayload) {		
 		console.log("selectDueItems value : ", originalPayload)
 		console.log("getters.dueItems : ", getters.dueItems(state))
 		let arrayDueItems = getters.dueItems(state)
@@ -79,6 +100,7 @@ const actions = {
 			dispatch('fbUpdateItem', itemPayload)
 			//Object.assign(state.items[itemPayload.id], itemPayload.updates)
 		});
+		commit('selectDueItems', originalPayload)
 
 
 	},
@@ -170,6 +192,12 @@ const getters = {
 		return dueItems	
 		
 	},
+
+	lessonItems: () => {
+		console.log('lessonItems in store-items / get : ', Object.entries(state.items).filter(item => item[1].selected))
+		return Object.entries(state.items).filter(item => item[1].selected)
+	},
+
 	arrayOfItems: (state) => {
 		console.log('arrayOfItems:',Object.entries(state.items))
 		return Object.entries(state.items)
