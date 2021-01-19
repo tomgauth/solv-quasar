@@ -76,7 +76,6 @@ export default {
     },
     async playPlaylist(){
       var currentActiveIndex = this.currentQueue.findIndex(phrase => {
-        console.log(phrase[0] == this.currentActiveId);
         return phrase[0] == this.currentActiveId;
       });
       currentActiveIndex = (currentActiveIndex == -1) || (currentActiveIndex == null) ? 0 : currentActiveIndex;

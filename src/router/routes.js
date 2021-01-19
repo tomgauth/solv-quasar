@@ -6,19 +6,19 @@ const routes = [
     children: [
       { 
         path: '', 
-        component: () => import('pages/lesson-start.vue'), 
+        component: () => import('pages/PageLessonStart.vue'), 
       }, 
       { 
         path: '/lesson-play', 
-        component: () => import('pages/lesson-play.vue'), 
+        component: () => import('pages/PageLessonPlay.vue'), 
       }, 
       { 
         path: '/settings', 
         component: () => import('pages/PageSettings.vue') 
       },
       { 
-        path: '/table', 
-        component: () => import('pages/PageTable.vue') 
+        path: '/list', 
+        component: () => import('pages/PageList.vue') 
       }
     ]
   },

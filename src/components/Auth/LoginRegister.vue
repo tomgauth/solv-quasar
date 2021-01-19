@@ -63,7 +63,7 @@
                     if (this.tab == 'login') {
                         this.loginUser(this.formData)
                     } else {
-                        console.log("register the user")
+                      
                         this.registerUser(this.formData)
                     }
                 }

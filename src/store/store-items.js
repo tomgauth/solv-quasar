@@ -15,14 +15,12 @@ const state = {
 
 const mutations = {
 	updateItem(state, payload) {
-		console.log('mutation updateItem payload : ', payload)
 		Object.assign(state.items[payload.id], payload.updates)
 	},
 	deleteItem(state, id) {
 		Vue.delete(state.items, id)
 	},
 	addItem(state, payload) {
-		console.log('payload in mutation addItem: ', payload)
 		Vue.set(state.items, payload.id, payload.item)
 	},
 	setSearch(state, value) {
@@ -32,7 +30,6 @@ const mutations = {
 		state.sort = value
 	},
 	incrementIndex(state) {
-		console.log("state.itemIndex: ", state.itemIndex)
 		state.itemIndex += 1
 	}
 }
@@ -40,7 +37,6 @@ const mutations = {
 
 const actions = {
 	updateItem({ dispatch }, payload) {
-		console.log('actions / update Item triggered : ', payload)
 		dispatch('fbUpdateItem', payload)
 	},
 	deleteItem({ dispatch }, id) {
@@ -52,7 +48,6 @@ const actions = {
 			id: itemId,
 			item: item
 		}
-		console.log('actions / addItem triggered item : ', item)
 		dispatch('fbAddItem', payload)
 	},
 	setSearch({ commit }, value) {
@@ -65,17 +60,12 @@ const actions = {
 		commit('incrementIndex')
 	}, 
 	selectDueItems({ dispatch }, originalPayload) {
-		console.log("selectDueItems value : ", originalPayload)
-		console.log("getters.dueItems : ", getters.dueItems(state))
 		let arrayDueItems = getters.dueItems(state)
 		let updates = {selected:''}
 		let itemPayload = {id:'', updates}
 		Object.entries(arrayDueItems).forEach(dueItem => {
-			console.log('item[1].selected :',dueItem[1].selected)
 			itemPayload.id = dueItem[0]
-			console.log('value :', originalPayload)
 			itemPayload.updates.selected = originalPayload
-			console.log('itemPayload :', itemPayload)
 			dispatch('fbUpdateItem', itemPayload)
 			//Object.assign(state.items[itemPayload.id], itemPayload.updates)
 		});
@@ -89,7 +79,6 @@ const actions = {
 
 		initialData.on('child_added', snapshot => {
 			let item = snapshot.val()
-			console.log('item : ', item)
 			let payload = {
 				id: snapshot.key,
 				item: item
@@ -101,14 +90,10 @@ const actions = {
 		//state.items = firebaseDb.ref('initial_data')
 	},
     fbReadData({ commit }) {
-        console.log("start reading data from firebase")
         let userId = firebaseAuth.currentUser.uid
         let userItems = firebaseDb.ref('items/'+userId)
-        // console.log(userItems)
-
         // child added
 		userItems.on('child_added', snapshot => {
-            console.log('snapshot: ', snapshot)
 			let item = snapshot.val()
 			let payload = {
 				id: snapshot.key,
@@ -124,7 +109,6 @@ const actions = {
 				id: snapshot.key,
 				updates: item
 			}
-			console.log('child_changed! payload: ', payload)
 			commit('updateItem', payload)
 		})
 
@@ -142,7 +126,6 @@ const actions = {
 	fbUpdateItem({}, payload) {
 		let userId = firebaseAuth.currentUser.uid
 		let itemRef = firebaseDb.ref('items/' + userId + '/' + payload.id)
-		console.log('actions / fbUpdateItem payload.updates : ', payload.updates, 'itemRef : ', itemRef)
 		itemRef.update(payload.updates)
 	},
 	fbDeleteItem({}, itemId) {
@@ -171,11 +154,9 @@ const getters = {
 		
 	},
 	arrayOfItems: (state) => {
-		console.log('arrayOfItems:',Object.entries(state.items))
 		return Object.entries(state.items)
 	},
 	getItemByName: state => name => {
-		console.log(Object.values(state.items).find(item => item.name === name))
 		return Object.values(state.items).find(item => item.name === name)
 	}, 
     itemsFiltered: (state) => {
@@ -185,8 +166,6 @@ const getters = {
 				let item = state.items[key],
 						itemFrLowerCase = item.fr.toLowerCase(),
 						searchLowerCase = state.search.toLowerCase()
-				console.log("items : ", items)
-				console.log("item : ", item)
 				if (itemFrLowerCase.includes(searchLowerCase)) {
 					itemsFiltered[key] = item
 				}
