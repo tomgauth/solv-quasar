@@ -66,7 +66,7 @@ export default {
     }
   },
   methods:{
-    ...mapActions('playlist', ['setAudioStatus','setCurrentActive','setStatusPendingAll']),
+    ...mapActions('playlist', ['setAudioStatus','setCurrentActive','setStatusPendingAll','lessonStatusChange']),
     async initializePlaylist(){
       this.querying = true;
       await this.$store.dispatch("playlist/populateCurrentQueue");
@@ -90,7 +90,7 @@ export default {
         //gap delay
         this.gapPauseWatch = true;
         this.gapPause = false;
-        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),2000));
+        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),500));
         this.gapPauseWatch = false;
 
         if (this.gapPause)
@@ -162,13 +162,14 @@ export default {
       this.playing = true;
     },
     abort(){
+      this.lessonStatusChange(false);
       this.$router.push("/");
     }
   },
   computed:{
     ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName', 'dueItems']),
     ...mapGetters('playlist', ['getPlayedPhrases','getIntermediateSettings']),
-    ...mapState('playlist', ['currentQueue','currentActiveId']),
+    ...mapState('playlist', ['currentQueue','currentActiveId','lessonStarted']),
     progressVal(){
       var playlistLength = this.currentQueue.length;
       var playedPhrasesLength = this.getPlayedPhrases.length;
@@ -188,6 +189,7 @@ export default {
     }
   },
   mounted(){
+    this.lessonStatusChange(true);
     this.currentActiveId == null ? this.initializePlaylist() : this.playPlaylist();
   },
   beforeDestroy(){

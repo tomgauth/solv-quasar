@@ -54,9 +54,13 @@ export default {
   },
   computed: {
   ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName', 'dueItems']),
-  ...mapState('items', ['items', 'itemIndex'])
+  ...mapState('items', ['items', 'itemIndex']),
+  ...mapState('playlist', ['currentQueue','currentActiveId','lessonStarted']),
   },
   mounted: function () {
+    if(this.lessonStarted)
+    this.$router.push('/lesson-play');
+    else
     this.phrasesToBeLearned = this.arrayOfItems.filter(item => item[1].selected);
   }
 }

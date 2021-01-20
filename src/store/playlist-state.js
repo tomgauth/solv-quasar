@@ -3,7 +3,7 @@ import { audioStatusEnum,interTypeEnum } from '../app.constants';
 import { firebaseStorage } from '../boot/firebase';
 
 const state = {
-
+    lessonStarted:false,
     currentQueue:[],
     currentActiveId:null,
     settings:{
@@ -29,20 +29,26 @@ const mutations = {
     },
     statusPendingAll(state){
         state.currentQueue.forEach(phrase => {
-                phrase[1].status = audioStatusEnum.pending;
+        phrase[1].status = audioStatusEnum.pending;
         });
+    },
+    lessonStatusChanged(state,payload){
+        state.lessonStarted = payload;
     }
 }
 
 const actions = {
   setCurrentActive({ commit },payload){
-    commit('currentActiveSet',payload);
+        commit('currentActiveSet',payload);
   },
   setAudioStatus({ commit },payload ){
         commit('audioStatusSet',payload);
     },
   setStatusPendingAll({commit}){
         commit('statusPendingAll');
+  },
+  lessonStatusChange({commit},payload){    
+        commit('lessonStatusChanged',payload);
   },
   async populateCurrentQueue({ dispatch, commit, getters, rootGetters },payload)
     {
