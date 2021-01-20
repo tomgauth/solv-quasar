@@ -35,8 +35,9 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
-      show-if-above
-      bordered
+      overlay
+      elevated
+      behavior="mobile"
       content-class="bg-grey-2"
     >
       <q-list>

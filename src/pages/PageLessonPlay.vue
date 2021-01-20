@@ -1,6 +1,11 @@
 <template>
-  <q-page padding class="row justify-center items-center">
+  <q-page padding class="row justify-center items-center lesson-page">
     <q-card class="q-pa-lg learn-card column">
+      <q-card-section class="q-my-none q-pa-none">
+         <q-btn @click="restartLesson()" color="white" icon="arrow_back" text-color="black" round flat >
+           <q-tooltip>Lesson start screen</q-tooltip>
+         </q-btn>
+      </q-card-section>
       <q-card-section style="margin:auto 0" class="row items-center justify-center">
         <div class="col-12 text-center">
           <span class="text-h4">{{ totalPhrasesPlayed }}<span class="text-h4">/</span>{{ playlistLength }}</span>
@@ -164,6 +169,10 @@ export default {
     abort(){
       this.lessonStatusChange(false);
       this.$router.push("/");
+    },
+    restartLesson(){
+      this.lessonStatusChange(false);
+      this.$router.push('/');
     }
   },
   computed:{
@@ -197,3 +206,13 @@ export default {
   }
 }
 </script>
+
+<style >
+.lesson-page{
+  background-image: url('~assets/bg/audio.svg');
+  background-position: top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+</style>
