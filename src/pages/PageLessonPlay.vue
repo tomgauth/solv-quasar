@@ -31,7 +31,7 @@
       </q-card-section>
       <q-card-section class="text-center q-gutter-sm btn-container">
         <div v-if="playing && (totalPhrasesPlayed != playlistLength)">
-          <q-btn @click="pause" :disable="querying" round color="black" class="q-pa-sm" text-color="white" unelevated  icon="pause" />
+          <q-btn ref="pauseBtn" @click="pause" :disable="querying" round color="black" class="q-pa-sm" text-color="white" unelevated  icon="pause" />
         </div>
         <div class="q-gutter-sm" v-if="!playing">
           <q-btn @click="play()"  round color="black" class="q-pa-sm" text-color="white" unelevated  icon="play_arrow" />
@@ -59,7 +59,10 @@ export default {
       audio: new Audio(),
       tab:"fr",
       frPhrase:"French Phrase",
-      enPhrase:"English Translation"
+      enPhrase:"English Translation",
+      gapPause:false,
+      delegateFunc:null,
+      gapPauseWatch:false
     }
   },
   methods:{
@@ -74,12 +77,10 @@ export default {
       this.setStatusPendingAll();
       this.playPlaylist();
     },
-    async playPlaylist(){
-      var currentActiveIndex = this.currentQueue.findIndex(phrase => {
-        return phrase[0] == this.currentActiveId;
-      });
-      currentActiveIndex = (currentActiveIndex == -1) || (currentActiveIndex == null) ? 0 : currentActiveIndex;
-      for (let index = currentActiveIndex; index < this.currentQueue.length; index++) {
+    async playPlaylist(startIndex){
+      
+      var curIndex = startIndex == null  ? this.currentActiveIndex : startIndex;
+      for (let index = curIndex; index < this.currentQueue.length; index++) {
         const phrase = this.currentQueue[index];
         this.setCurrentActive(phrase[0]);
         this.setAudioStatus({ phraseId:phrase[0],status:audioStatusEnum.playing });
@@ -87,7 +88,16 @@ export default {
         this.setAudioStatus({ phraseId:phrase[0],status:audioStatusEnum.played });
         this.setCurrentActive(null);
         //gap delay
-        await new Promise(resolve => setTimeout(resolve,2000));
+        this.gapPauseWatch = true;
+        this.gapPause = false;
+        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),2000));
+        this.gapPauseWatch = false;
+
+        if (this.gapPause)
+        {
+          this.delegateFunc = () => this.playPlaylist(index + 1);
+          break;
+        }
       }
     },
     async playPhrase(phrase){
@@ -99,13 +109,29 @@ export default {
         await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
         // intermediate
         var interSettings = this.getIntermediateSettings;
-        if ( interSettings.type == interTypeEnum.pause)
-        await new Promise(resolve => setTimeout(resolve,interSettings.pauseSeconds * 1000));
-        // english phrase
-        this.tab = "en";
-        this.enPhrase = phrase[1].en;
-        await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
-        resolve();
+        if ( interSettings.type == interTypeEnum.pause){
+          this.gapPauseWatch = true;
+          this.gapPause = false;
+          this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),interSettings.pauseSeconds * 1000));
+          this.gapPauseWatch = false;
+        }
+        if(this.gapPause == true){
+          this.delegateFunc = async ()=>{
+          // english phrase
+          this.tab = "en";
+          this.enPhrase = phrase[1].en;
+          await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
+          resolve();
+          };
+        }
+        else {
+          // english phrase
+          this.tab = "en";
+          this.enPhrase = phrase[1].en;
+          await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
+          resolve();
+        }
+
       });
     },
     async playSubPhrase(audioURL){
@@ -118,12 +144,22 @@ export default {
       });
     },
     pause(){
+      if(this.gapPauseWatch == true){
+          this.gapPause = true;
+      }
+      else
       this.audio.pause();
+
       this.playing = false;
     },
     play(){
-      this.playing = true;
+      if(this.gapPause == true){
+          this.delegateFunc();
+          this.delegateFunc = null;
+          this.gapPause = false;
+      }
       this.audio.play();
+      this.playing = true;
     },
     abort(){
       this.$router.push("/");
@@ -143,6 +179,12 @@ export default {
     },
     playlistLength(){
       return this.currentQueue.length;
+    },
+    currentActiveIndex(){
+      var currentActiveInd = this.currentQueue.findIndex(phrase => {
+        return phrase[0] == this.currentActiveId;
+      });
+      return (currentActiveInd == -1) || (currentActiveInd == null) ? 0 : currentActiveInd;
     }
   },
   mounted(){
