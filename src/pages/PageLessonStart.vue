@@ -1,5 +1,5 @@
 <template>
-  <q-page class="row items-center justify-center" padding>
+  <q-page class="row items-center justify-center lesson-page" padding>
       <q-card  class="q-pa-lg learn-card column">
         <q-card-section class="row justify-center">
           <h6 class="text-h5 q-my-lg">{{ phrasesToBeLearned.length }} phrases to learn</h6>
@@ -65,7 +65,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 
 .btn-container{
 justify-self: flex-end;

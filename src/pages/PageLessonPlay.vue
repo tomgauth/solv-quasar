@@ -43,7 +43,7 @@
           <q-btn  @click="abort()" round color="black" class="q-pa-sm" text-color="white" unelevated  icon="stop" />
         </div>
         <div v-if="totalPhrasesPlayed == playlistLength">
-          <q-btn @click="replayPlaylist()" round color="black" class="q-pa-sm" text-color="white" unelevated  icon="replay" />
+          <q-btn :disable="querying" @click="replayPlaylist()" round color="black" class="q-pa-sm" text-color="white" unelevated  icon="replay" />
         </div>
       </q-card-section>
     </q-card>
@@ -207,12 +207,6 @@ export default {
 }
 </script>
 
-<style >
-.lesson-page{
-  background-image: url('~assets/bg/audio.svg');
-  background-position: top;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
+<style scoped>
+
 </style>
