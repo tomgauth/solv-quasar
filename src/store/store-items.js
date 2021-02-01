@@ -2,6 +2,8 @@ import { firebaseDb, firebaseAuth } from 'boot/firebase'
 import Vue from 'vue'
 import { uid } from 'quasar'
 import moment from 'moment'
+import airtableService from './services/airtable.service';
+import { AirParams } from './services/airtableconstants';
 // import { longStackSupport } from 'q'
 
 const state = {
@@ -90,6 +92,7 @@ const actions = {
 		//state.items = firebaseDb.ref('initial_data')
 	},
     fbReadData({ commit }) {
+		airtableService.getKeyPhrasesList({ [AirParams.view]:"Atom" }).then(resp=>console.log(resp));
         let userId = firebaseAuth.currentUser.uid
         let userItems = firebaseDb.ref('items/'+userId)
         // child added

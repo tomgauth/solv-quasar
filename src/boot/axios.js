@@ -1,4 +1,5 @@
 import axios from 'axios';
-import Vue from 'vue';
 
-Vue.prototype.$axios = axios;
+export default async ({ app, router, store, Vue }) => {
+    Vue.prototype.$axios = axios;
+  };
