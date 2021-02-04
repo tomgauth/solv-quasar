@@ -87,10 +87,10 @@ export default {
       var curIndex = startIndex == null  ? this.currentActiveIndex : startIndex;
       for (let index = curIndex; index < this.currentQueue.length; index++) {
         const phrase = this.currentQueue[index];
-        this.setCurrentActive(phrase[0]);
-        this.setAudioStatus({ phraseId:phrase[0],status:audioStatusEnum.playing });
+        this.setCurrentActive(phrase.id);
+        this.setAudioStatus({ phraseId:phrase.id,status:audioStatusEnum.playing });
         await this.playPhrase(phrase);
-        this.setAudioStatus({ phraseId:phrase[0],status:audioStatusEnum.played });
+        this.setAudioStatus({ phraseId:phrase.id,status:audioStatusEnum.played });
         this.setCurrentActive(null);
         //gap delay
         this.gapPauseWatch = true;
@@ -110,8 +110,8 @@ export default {
       return new Promise(async (resolve,reject) => {
         // french phrase
         this.tab="fr";
-        this.frPhrase = phrase[1].fr;
-        await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
+        this.frPhrase = phrase.fields.French;
+        await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
         // intermediate
         var interSettings = this.getIntermediateSettings;
         if ( interSettings.type == interTypeEnum.pause){
@@ -124,16 +124,16 @@ export default {
           this.delegateFunc = async ()=>{
           // english phrase
           this.tab = "en";
-          this.enPhrase = phrase[1].en;
-          await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
+          this.enPhrase = phrase.fields.English;
+          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
           resolve();
           };
         }
         else {
           // english phrase
           this.tab = "en";
-          this.enPhrase = phrase[1].en;
-          await this.playSubPhrase(phrase[1].mergedSequence.frAudioURL);
+          this.enPhrase = phrase.fields.English;
+          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
           resolve();
         }
 
@@ -176,7 +176,6 @@ export default {
     }
   },
   computed:{
-    ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName', 'dueItems']),
     ...mapGetters('playlist', ['getPlayedPhrases','getIntermediateSettings']),
     ...mapState('playlist', ['currentQueue','currentActiveId','lessonStarted']),
     progressVal(){
@@ -192,7 +191,7 @@ export default {
     },
     currentActiveIndex(){
       var currentActiveInd = this.currentQueue.findIndex(phrase => {
-        return phrase[0] == this.currentActiveId;
+        return phrase.id == this.currentActiveId;
       });
       return (currentActiveInd == -1) || (currentActiveInd == null) ? 0 : currentActiveInd;
     }

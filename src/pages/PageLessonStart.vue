@@ -7,13 +7,13 @@
         <q-card-section>
           <q-scroll-area style="height: 40vh" :thumb-style="thumbStyle" :bar-style="barStyle">
             <q-list  separator>
-                <q-item v-for="phrase in phrasesToBeLearned" :key="phrase[0]" >
+                <q-item v-for="phrase in phrasesToBeLearned" :key="phrase.id" >
                   <q-item-section>
                     <div>
-                      <span class="text-subtitle2">{{ phrase[1].fr }}</span>
+                      <span class="text-subtitle2">{{ phrase.fields.French }}</span>
                     </div>
                     <div>
-                      <span class="text-grey-7">{{ phrase[1].en }}</span>
+                      <span class="text-grey-7">{{ phrase.fields.English }}</span>
                     </div> 
                   </q-item-section>
                 </q-item>
@@ -53,15 +53,14 @@ export default {
    }
   },
   computed: {
-  ...mapGetters('items', ['items', 'arrayOfItems', 'getItemByName', 'dueItems']),
-  ...mapState('items', ['items', 'itemIndex']),
+  ...mapGetters('items', ['getKeyPhrasesList']),
   ...mapState('playlist', ['currentQueue','currentActiveId','lessonStarted']),
   },
   mounted: function () {
     if(this.lessonStarted)
     this.$router.push('/lesson-play');
     else
-    this.phrasesToBeLearned = this.arrayOfItems.filter(item => item[1].selected);
+    this.phrasesToBeLearned = this.getKeyPhrasesList.filter(phrase => phrase.fields.selected);
   }
 }
 </script>

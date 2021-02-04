@@ -42,7 +42,7 @@ const actions = {
             LocalStorage.set('loggedIn', true)
             //dispatch('lessons/fbReadData', null, { root: true })
             this.$router.push('/').catch(err => {})
-            dispatch('items/fbReadData', null, { root: true })
+            dispatch('items/populateKeyPhrases', null, { root: true })
 		  }
 		  else {
 		  	commit('setLoggedIn', false)
