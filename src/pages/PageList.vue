@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="flex-center">
     <q-table 
-      class="q-pa-md" 
+      class="q-pa-md custom" 
       title="Treats" 
       :data="data" 
       :columns="columns"
@@ -12,11 +12,39 @@
       row-key="Record ID" >
 
       <template v-slot:top-right>
-        <q-input rounded dense debounce="300" standout v-model="filter" placeholder="Search">
+        <q-input clearable rounded dense debounce="300" standout v-model="filter" placeholder="Search">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
+      </template>
+
+      <template v-slot:header-cell-Tags="props">
+        <q-th :props="props" class="row items-center">
+          <span class="col-1">
+            {{props.col.name}}
+          </span>
+           <!-- <q-btn color="white" text-color="black" icon="filter_list" round flat size="12px" /> -->
+               <q-select
+                hide-bottom-space
+                hide-hint
+                bg-color="white"
+                standout="bg-white"
+                dense
+                hide-dropdown-icon
+                v-model="filteredTags"
+                use-input
+                use-chips
+                multiple
+                input-debounce="0"
+                :options="tagsOptions"
+                class="col-10"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="filter_list" color="black"/>
+                </template>
+               </q-select>
+        </q-th>
       </template>
     
       <template v-slot:body="props">
@@ -47,9 +75,6 @@
       </template>
 
     </q-table>
-    <div>
-      {{selected}}
-    </div>
   </q-page>
 </template>
 
@@ -60,6 +85,8 @@ import AudioBtn from '../components/AudioBtn.vue'
 export default {
   data(){
     return{
+      filteredTags:[],
+      tagsOptions:["present","Active","neutre","courant","affirmative","negative","indicatif"],
       filter:'',
       data:[],
       selected:[],
@@ -121,12 +148,23 @@ export default {
           var filteredRow = {};
           searchKeys.forEach(prop => filteredRow[prop] = row[prop]);
           return Object.values(this.flattenObject(filteredRow))
-              .filter(val => val.includes(terms))
+              .filter(val => this.localizeKeyWords(val).toLowerCase().includes(terms.toLowerCase()))
               .length >=1 ? true : false;
-
      });
-               
-      
+    },
+    localizeKeyWords(val){
+      var mapper = {
+        "e":/e|é|è|ê|ë/gi,
+        "c":/c|ç/gi,
+        "a":/a|à|â/gi
+      };
+      for (const key in mapper) {
+        if (Object.hasOwnProperty.call(mapper, key)) {
+          const regex = mapper[key];
+          val = val.replace(regex,key);
+        }
+      }
+      return val;
     },
     flattenObject(obj) {
         const flattened = {}
@@ -152,5 +190,17 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
+<style lang="scss" >
+.q-select__input.q-placeholder.col.q-select__input--padding{
+  display: none;
+}
+label .q-chip.row.inline.no-wrap.items-center.q-chip--dense{
+  color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: rebeccapurple;
+}
+label .q-field__prepend.q-field__marginal.row.no-wrap.items-center{
+  margin: auto;
+}
 </style>
