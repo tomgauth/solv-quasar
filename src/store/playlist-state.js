@@ -75,7 +75,7 @@ const actions = {
            phrase.fields.status = audioStatusEnum.pending;
        }
        commit('currentQueuePopulated',selectedPhrases);
-    }
+    } 
 }
 
 const getters = {

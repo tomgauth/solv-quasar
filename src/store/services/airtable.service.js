@@ -30,7 +30,14 @@ function getKeyPhrasesList(airParams){
     return getRecordsList("Key Phrases",airParams);
 }
 
+//Levels Table
+
+function getLevelsList(airParams){
+    return getRecordsList("Levels",airParams);
+}
+
 export default {
-    getKeyPhrasesList
+    getKeyPhrasesList,
+    getLevelsList
 }
 
