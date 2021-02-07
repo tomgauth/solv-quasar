@@ -1,5 +1,5 @@
 import { firebaseAuth } from "../boot/firebase"
-import { LocalStorage, Loading } from 'quasar'
+import { LocalStorage, Loading,QSpinnerFacebook } from 'quasar'
 
 const state = {
     loggedIn: false
@@ -12,37 +12,32 @@ const mutations = {
 }
 
 const actions = {
-    registerUser({}, payload) {
-        Loading.show()
-        firebaseAuth.createUserWithEmailAndPassword(payload.email, payload.password)
-        .then(response => {
-        })
-        .catch(error => {
-            
-        })
+    async registerUser({}, payload) {
+        Loading.show({
+            backgroundColor:"black",
+            spinner:QSpinnerFacebook
+        });
+        await firebaseAuth.createUserWithEmailAndPassword(payload.email, payload.password);
     },
-    loginUser({}, payload) {
-        Loading.show()
-        firebaseAuth.signInWithEmailAndPassword(payload.email, payload.password) 
-        .then(response => {
-        })
-        .catch(error => {
-            
-            Loading.hide()
-        })
+    async loginUser({}, payload) {
+        Loading.show({
+            backgroundColor:"black",
+            spinner:QSpinnerFacebook
+        });
+        await firebaseAuth.signInWithEmailAndPassword(payload.email, payload.password);
     },
     logoutUser({}, payload) {
         firebaseAuth.signOut()
     },
-    handleAuthStateChange( { commit, dispatch } ) {
-		firebaseAuth.onAuthStateChanged(user => {
-			Loading.hide()
+    async handleAuthStateChange( { commit, dispatch } ) {
+		firebaseAuth.onAuthStateChanged(async (user) => {
 		  if (user) {
 		    commit('setLoggedIn', true)
             LocalStorage.set('loggedIn', true)
             //dispatch('lessons/fbReadData', null, { root: true })
-            this.$router.push('/').catch(err => {})
-            dispatch('items/populateKeyPhrases', null, { root: true })
+            await dispatch('items/populateKeyPhrases', null, { root: true });
+            this.$router.push('/').catch(err => {});
+            Loading.hide();
 		  }
 		  else {
 		  	commit('setLoggedIn', false)

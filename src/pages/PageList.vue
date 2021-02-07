@@ -8,8 +8,10 @@
       :selected.sync="selected"
       selection="multiple" 
       :filter="filter"
+      :loading="tableLoading"
       :filter-method="customFilter"
-      row-key="Record ID" >
+      row-key="Record ID"
+      @selection="selection" >
 
       <template v-slot:top-right>
         <q-input clearable rounded dense debounce="300" standout v-model="filter" placeholder="Search">
@@ -86,6 +88,7 @@ export default {
   data(){
     return{
       filteredTags:[],
+      tableLoading:false,
       tagsOptions:["present","Active","neutre","courant","affirmative","negative","indicatif"],
       filter:'',
       data:[],
@@ -137,9 +140,10 @@ export default {
     ...mapGetters('items', ['getTableData']),
   },
   methods:{
-    ...mapActions('items', ['setCurrentActive','populateAllKeyPhrasesDetails']),
+    ...mapActions('items', ['setCurrentActive','populateAllKeyPhrasesDetails','toggleSelection']),
     populateTableData(){
       this.data = this.getTableData;
+      this.selected = this.data.filter(rec => rec.selected);
     },
     customFilter(rows, terms){
 
@@ -178,19 +182,24 @@ export default {
         })
 
         return flattened;
+    },
+    selection(details){
+     this.toggleSelection(details);
     }
   },
   components:{
     AudioBtn
   },
-  mounted(){
-   this.populateAllKeyPhrasesDetails();
-   this.populateTableData();
+  async mounted(){
+     this.tableLoading = true;
+     await this.populateAllKeyPhrasesDetails();
+     this.populateTableData();
+     this.tableLoading = false;
   }
 }
 </script>
 
-<style lang="scss" >
+<style lang="scss"  >
 .q-select__input.q-placeholder.col.q-select__input--padding{
   display: none;
 }

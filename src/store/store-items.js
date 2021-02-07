@@ -51,20 +51,33 @@ const mutations = {
 	},
 	voicesPopulated(state,payload){
 		// state.Tags.Voices = [...state.Tags.Voices,...payload];
+	},
+	selectionToggled(state,payload){
+		payload.keys.forEach(key => {	
+			var mutatedPhrase = state.keyPhrases.find(phrase => phrase.id == key);
+			mutatedPhrase.fields.selected = payload["added"] ? true : false;
+		})
 	}
 }
 
 
 const actions = {
 
+	toggleSelection({commit},payload){
+		commit('selectionToggled',payload);
+	},
 	async populateKeyPhrases({ commit }){
-		const response = await airtableService.getKeyPhrasesList({ 
-			[AirParams.view]:"Atom"
-		 });
-		 //adding selected field
-		 response.records.forEach(rec => rec.fields.selected = true);
-		 //
-		commit('keyPhrasesPopulated',response.records);
+
+		return new Promise(async (resolve) => {
+			const response = await airtableService.getKeyPhrasesList({ 
+				[AirParams.view]:"Atom"
+			 });
+			 //adding selected field
+			 response.records.forEach(rec => rec.fields.selected = true);
+			 //
+			commit('keyPhrasesPopulated',response.records);
+			resolve();
+		});
 	},
 	async populateAllKeyPhrasesDetails({ getters,dispatch },payload){
 		var keys = getters.getAllKeyPhrasesKeys;
@@ -145,6 +158,7 @@ const getters = {
 					'French' : phrase.French, 
 					'Level' : state.Levels.find(level => level.id == phrase.Level[0]).fields.Name,
 					'audioUrl' : phrase.audioUrl[0],
+					'selected' : phrase.selected,
 					'Tags': {
 						Tense:phrase.Tense[0],
 						Voice:phrase.Voice,
