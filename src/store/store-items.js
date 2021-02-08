@@ -34,23 +34,28 @@ const mutations = {
         Object.assign(state.keyPhrases)
 	},
 	levelsPopulated(state,payload){
-		Vue.set(state,'Levels',[...state.Levels,...payload.records]);
-		// state.Levels = [...state.Levels,...payload];
+		var uniqueLevels = [...new Set([...state.Levels,...payload.records])];
+		Vue.set(state,'Levels',[...uniqueLevels]);
 	},
 	tensesPopulated(state,payload){
-		// state.Tags.Tenses = [...state.Tags.Tenses,...payload];
+		var uniqueTenses = [...new Set([...state.Tags.Tenses,...payload])];
+		Vue.set(state.Tags,'Tenses',[...uniqueTenses]);
 	},
 	moodsPopulated(state,payload){
-		// state.Tags.Moods = [...state.Tags.Moods,...payload];
+		var uniqueMoods = [...new Set([...state.Tags.Moods,...payload])];
+		Vue.set(state.Tags,'Moods',[...uniqueMoods]);
 	},
 	formsPopulated(state,payload){
-		// state.Tags.Forms = [...state.Tags.Forms,...payload];
+		var uniqueForms = [...new Set([...state.Tags.Forms,...payload])];
+		Vue.set(state.Tags,'Forms',[...uniqueForms]);
 	},
 	registresPopulated(state,payload){
-		// state.Tags.Registres = [...state.Tags.Registres,...payload];
+		var uniqueRegistres = [...new Set([...state.Tags.Registres,...payload])];
+		Vue.set(state.Tags,'Registres',[...uniqueRegistres]);
 	},
 	voicesPopulated(state,payload){
-		// state.Tags.Voices = [...state.Tags.Voices,...payload];
+		var uniqueVoices = [...new Set([...state.Tags.Voices,...payload])];
+		Vue.set(state.Tags,'Voices',[...uniqueVoices]);
 	},
 	selectionToggled(state,payload){
 		payload.keys.forEach(key => {	
@@ -95,28 +100,29 @@ const actions = {
 		//Populate Associated tags
 		
 		//Populate Tenses
-		// var tenses = filteredPhrases.map(phrase => phrase.fields.Tense[0]);
-		// var uniqueTenses = [...new Set(tenses)];
-		// commit('tensesPopulated',uniqueTenses);
+		var tenses = filteredPhrases.map(phrase => phrase.fields.Tense[0]);
+		var uniqueTenses = [...new Set(tenses)];
+		commit('tensesPopulated',uniqueTenses);
 
-		//Populate Mood
-		// var moods = filteredPhrases.map(phrase => phrase.fields.Mood)
-		// var uniqueMoods = [...new Set(moods)];
-		// commit('moodsPopulated',uniqueMoods);
+		// Populate Mood
+		var moods = filteredPhrases.map(phrase => phrase.fields.Mood)
+		var uniqueMoods = [...new Set(moods)];
+		commit('moodsPopulated',uniqueMoods);
 
-		//Populate Voice
-		// var voice = ["Active","Passive"];
-		// commit('voicesPopulated',voice);
+		// Populate Voice
+		var voices = filteredPhrases.map(phrase => phrase.fields.Voice)
+		var uniqueVoices = [...new Set(voices)];
+		commit('voicesPopulated',uniqueVoices);
 
-		//Populate Forms
-		// var forms = filteredPhrases.map(phrase => phrase.fields.Voice);
-		// var uniqueForms = [...new Set(forms)];
-		// commit("formsPopulated",uniqueForms);
+		// Populate Forms
+		var forms = filteredPhrases.map(phrase => phrase.fields.Form);
+		var uniqueForms = [...new Set(forms)];
+		commit("formsPopulated",uniqueForms);
 
-		//Populate Registre
-		// var registre = filteredPhrases.map(phrase => phrase.feilds.Registre[0]);
-		// var uniqueRegistre = [...new Set(registre)];
-		// commit("registresPopulated",uniqueRegistre);
+		// Populate Registre
+		var registre = filteredPhrases.map(phrase => phrase.fields.Registre[0]);
+		var uniqueRegistre = [...new Set(registre)];
+		commit("registresPopulated",uniqueRegistre);
 	},
 	async populateLevels({ dispatch,getters,commit },payload){
 		var levelFormula = `SEARCH(RECORD_ID(), "${payload.join(",")}") != ""`;
@@ -140,6 +146,16 @@ const actions = {
 
 const getters = {
 
+	getAllTagsValues(){
+		var temp=[];
+		for (const key in state.Tags) {
+			if (Object.hasOwnProperty.call(state.Tags, key)) {
+				const tag = state.Tags[key];
+				temp.push(...tag);
+			}
+		}
+		return temp;
+	},
 	getKeyPhrasesList(state){
 		return state.keyPhrases;
 	},

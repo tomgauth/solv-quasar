@@ -2,10 +2,12 @@
   <q-page padding class="flex-center">
     <q-table 
       class="q-pa-md custom" 
-      title="Treats" 
+      title="Phrases" 
       :data="data" 
       :columns="columns"
       :selected.sync="selected"
+      no-data-label="Nothing to learn!"
+      no-results-label="The filter didn't uncover any results!"
       selection="multiple" 
       :filter="filter"
       :loading="tableLoading"
@@ -14,7 +16,8 @@
       @selection="selection" >
 
       <template v-slot:top-right>
-        <q-input clearable rounded dense debounce="300" standout v-model="filter" placeholder="Search">
+        <label for="tagFilter" class="q-mx-sm text-bold">Search</label>
+        <q-input rounded dense  standout v-model="filter" ref="tagFilter" >
           <template v-slot:append>
             <q-icon name="search" />
           </template>
@@ -41,12 +44,22 @@
                 input-debounce="0"
                 :options="tagsOptions"
                 class="col-10"
+                @add="onTagOptionChange"
+                @remove="onTagOptionChange"
               >
                 <template v-slot:prepend>
                   <q-icon name="filter_list" color="black"/>
                 </template>
                </q-select>
         </q-th>
+      </template>
+      
+      <template v-slot:no-data="{ message }">
+        <div class="full-width row q-py-lg flex-center q-gutter-sm">
+          <span class="text-body2">
+            {{ message }}
+          </span>
+        </div>
       </template>
     
       <template v-slot:body="props">
@@ -89,7 +102,7 @@ export default {
     return{
       filteredTags:[],
       tableLoading:false,
-      tagsOptions:["present","Active","neutre","courant","affirmative","negative","indicatif"],
+      tagsOptions:[],
       filter:'',
       data:[],
       selected:[],
@@ -137,24 +150,39 @@ export default {
   },
   computed:{
     ...mapGetters('playlist', ['getPlayedPhrases']),
-    ...mapGetters('items', ['getTableData']),
+    ...mapGetters('items', ['getTableData','getAllTagsValues']),
   },
   methods:{
     ...mapActions('items', ['setCurrentActive','populateAllKeyPhrasesDetails','toggleSelection']),
     populateTableData(){
       this.data = this.getTableData;
       this.selected = this.data.filter(rec => rec.selected);
+      this.tagsOptions = this.getAllTagsValues;
     },
-    customFilter(rows, terms){
+    customFilter(){
+     return this.allFiltersApplied();
+    },
+    allFiltersApplied(){
+      var filteredRows = this.data.filter(row => {
+            var searchKeys = ["English","French","Tags","Level"];
+            var filteredRow = {};
+            searchKeys.forEach(prop => filteredRow[prop] = row[prop]);
+            return Object.values(this.flattenObject(filteredRow))
+                .filter(val => this.localizeKeyWords(val).toLowerCase().includes(this.filter.trim().toLowerCase()))
+                .length >=1 ? true : false;
+      });
 
-     return rows.filter(row => {
-          var searchKeys = ["English","French","Tags","Level"];
-          var filteredRow = {};
-          searchKeys.forEach(prop => filteredRow[prop] = row[prop]);
-          return Object.values(this.flattenObject(filteredRow))
-              .filter(val => this.localizeKeyWords(val).toLowerCase().includes(terms.toLowerCase()))
-              .length >=1 ? true : false;
-     });
+      var tagFiltered = filteredRows.filter(rec => {
+        var allTagsVals = Object.values(rec.Tags);
+        return this.filteredTags.every(val => allTagsVals.includes(val));
+      });
+      
+      return tagFiltered;
+    },
+    onTagOptionChange(detail){
+      if (this.filter.length == 0)
+      this.filter += " ";
+  
     },
     localizeKeyWords(val){
       var mapper = {
