@@ -1,7 +1,9 @@
 <template>
   <q-page padding class="flex-center">
     <q-table 
-      class="q-pa-md custom" 
+      class="q-pa-md custom table-responsive" 
+      :dense="$q.screen.lt.md"
+      :grid="$q.screen.lt.sm"
       title="Phrases" 
       :data="data" 
       :columns="columns"
@@ -15,13 +17,73 @@
       row-key="Record ID"
       @selection="selection" >
 
+      <template v-slot:item="props">
+        <div
+          class="transition q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition custom-transition"
+          :style="props.selected ? 'transform: scale(0.95);' : ''"
+        >
+          <q-card>
+            <q-card-section>
+              <q-badge color="black" text-color="white" floating class="dark-card-badge q-pa-sm" :label="`Level ${props.row.Level}`" />
+              
+            </q-card-section>
+            <q-card-section class="row items-center justify-between">
+              <span class="text-h3 text-bold text-grey-4">Fr</span>
+              <span class="text-body1 text-bold"><q>{{ props.row.French}}</q></span>
+            </q-card-section>
+            <q-card-section class="row items-center justify-between">
+              <span class="text-h3 text-bold text-grey-4">En</span>
+              <span class="text-body1 text-bold"><q>{{ props.row.English }}</q></span>
+            </q-card-section>
+            <q-card-section class="row items-center q-my-md q-gutter-sm justify-center">
+              <q-badge outline class="q-pa-sm q-mx-xs" rounded color="orange"  text-color="black" :label="props.row.Tags.Tense" />
+              <q-badge outline class="q-pa-sm q-mx-xs" color="cyan" rounded text-color="black" :label="props.row.Tags.Voice" />
+              <q-badge outline class="q-pa-sm q-mx-xs" color="red" rounded text-color="black" :label="props.row.Tags.Registre" />
+              <q-badge outline class="q-pa-sm q-mx-xs" color="green" rounded text-color="black" :label="props.row.Tags.Form" />
+              <q-badge outline class="q-pa-sm q-mx-xs" color="grey" rounded text-color="black" :label="props.row.Tags.Mood" />
+            </q-card-section>
+            <q-card-section class="row  items-center justify-center">
+              <audio-btn size="18px" :audioUrl="props.row.audioUrl"></audio-btn>
+            </q-card-section>
+            <q-card-section class="column items-center justify-center">
+                <q-badge color="black" outline class="q-pa-sm" text-color="white" label="Learn this phrase" />
+                <q-checkbox v-model="props.selected" color="black" />
+            </q-card-section>
+          </q-card>
+          
+        </div>
+      </template>
       <template v-slot:top-right>
-        <label for="tagFilter" class="q-mx-sm text-bold">Search</label>
-        <q-input rounded dense  standout v-model="filter" ref="tagFilter" >
+        <label for="tagFilter" v-if="!$q.screen.lt.sm" class="q-mx-sm text-bold">Search</label>
+        <q-input :class="[{'q-mt-md':$q.screen.lt.sm},{'full-width':$q.screen.lt.sm}]" rounded dense standout v-model="filter" ref="tagFilter" >
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
+        <div class="column text-bold q-my-md" v-if="$q.screen.lt.sm">
+          <label class="q-mt-md"> Tag Filter </label>
+               <q-select
+                hide-bottom-space
+                hide-hint
+                bg-color="white"
+                standout="bg-white"
+                dense
+                hide-dropdown-icon
+                v-model="filteredTags"
+                use-input
+                use-chips
+                multiple
+                input-debounce="0"
+                :options="tagsOptions"
+                class="col-10"
+                @add="onTagOptionChange"
+                @remove="onTagOptionChange"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="filter_list" color="black"/>
+                </template>
+               </q-select>
+        </div>
       </template>
 
       <template v-slot:header-cell-Tags="props">
@@ -109,7 +171,6 @@ export default {
       columns:[
         {
           name: 'French',
-          required: true,
           label: 'French',
           align: 'left',
           field: row => row.French,
@@ -117,7 +178,6 @@ export default {
         },
         {
           name: 'English',
-          required: true,
           label: 'English',
           align: 'left',
           field: row => row.English,
@@ -125,14 +185,12 @@ export default {
         },
         {
           name: 'Tags',
-          required: true,
           label: 'Tags',
           align: 'left',
           field: row => row.Tags,
         },
         {
           name: 'Level',
-          required: true,
           label: 'Level',
           align: 'left',
           field: row => row.Level,
@@ -140,7 +198,6 @@ export default {
         },
         {
           name: 'Audio',
-          required: true,
           field: row => row.audioUrl,
           label: 'Audio',
           align: 'left',
@@ -158,6 +215,9 @@ export default {
       this.data = this.getTableData;
       this.selected = this.data.filter(rec => rec.selected);
       this.tagsOptions = this.getAllTagsValues;
+    },
+    onLeft(details){
+      console.log(details);
     },
     customFilter(){
      return this.allFiltersApplied();
@@ -239,5 +299,11 @@ label .q-chip.row.inline.no-wrap.items-center.q-chip--dense{
 }
 label .q-field__prepend.q-field__marginal.row.no-wrap.items-center{
   margin: auto;
+}
+.custom-transition{
+  transition: all .3s;
+}
+.dark-card{
+  background-color: black;
 }
 </style>

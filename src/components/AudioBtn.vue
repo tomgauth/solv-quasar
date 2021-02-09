@@ -1,5 +1,5 @@
 <template>
-     <q-btn @click="togglePlay" round color="black" :disable="buffering" :icon="!playing ? 'play_arrow' : 'stop'" />
+     <q-btn :size="size" @click="togglePlay" round color="black" :disable="buffering" :icon="!playing ? 'play_arrow' : 'stop'" />
 </template>
 <script>
 export default {
@@ -25,6 +25,9 @@ export default {
         audioUrl:{
             type:String,
             required:true
+        },
+        size:{
+            type:String
         }
     },
     mounted(){
