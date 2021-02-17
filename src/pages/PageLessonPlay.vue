@@ -22,13 +22,13 @@
             class="text-primary "
           >
             <q-tab name="fr" label="French" />
-            <q-tab name="en" label="English" />
+            <q-tab v-show="hideENTab" name="en" label="English" />
           </q-tabs>
           <div class="text-center q-pt-md row ">
-            <div class="col-6 q-pa-sm">
+            <div class="col q-pa-sm">
               <span :class="{'text-subtitle2':true,'text-grey':tab != 'fr'}">{{ frPhrase }}</span>
             </div>
-            <div class="col-6 q-pa-sm">
+            <div v-show="hideENTab" class="col q-pa-sm">
               <span :class="{'text-subtitle2':true,'text-grey':tab != 'en'}">{{ enPhrase }}</span>
             </div>
           </div>
@@ -53,7 +53,7 @@
 <script>
 import { firebaseStorage } from '../../src/boot/firebase';
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { interTypeEnum,audioStatusEnum } from '../app.constants';
+import { interTypeEnum,audioStatusEnum,learningMode } from '../app.constants';
 
 export default {
   // name: 'PageName',
@@ -109,49 +109,89 @@ export default {
     async playPhrase(phrase){
       // depending on mode of playing
       return new Promise(async (resolve,reject) => {
-        // french phrase
-         await this.singlePart('fr',phrase);
-        // intermediate
-        if ( this.settings.type == interTypeEnum.pause){
-         await this.singlePart('inter',phrase);
-        }
-        if(this.gapPause == true){
-          this.delegateFunc = async ()=>{
-          // english phrase
-          await this.singlePart('en',phrase);
+
+        if(this.settings.learningMode == learningMode.comprehension){
+          var pattern = ['fr','inter','en'];          
+          for (const key of pattern.keys()) {
+            const part = pattern[key];
+            if( this.gapPause == true ){
+                this.delegateFunc = async ()=>{
+                await this.singlePart(part,phrase);
+                resolve();
+              };
+            }
+            else{
+              await this.singlePart(part,phrase);
+              if(key == pattern.length - 1)
+              resolve();
+            }
           };
         }
-        else {
-          // english phrase
-          await this.singlePart('en',phrase);
+        if(this.settings.learningMode == learningMode.recall){
+          var pattern = ['en','inter','fr'];          
+          for (const key of pattern.keys()) {
+            const part = pattern[key];
+            if( this.gapPause == true ){
+                this.delegateFunc = async ()=>{
+                await this.singlePart(part,phrase);
+                resolve();
+              };
+            }
+            else{
+              await this.singlePart(part,phrase);
+              if(key == pattern.length - 1)
+              resolve();
+            }
+          };
         }
-
-        resolve();
+        if(this.settings.learningMode == learningMode.listenRepeat){
+          var pattern = ['fr','inter','fr'];          
+          for (const key of pattern.keys()) {
+            const part = pattern[key];
+            if( this.gapPause == true ){
+                this.tab = part;
+                this.delegateFunc = async ()=>{
+                await this.singlePart(part,phrase);
+                resolve();
+              };
+            }
+            else{
+              await this.singlePart(part,phrase);
+              if(key == pattern.length - 1)
+              resolve();
+            }
+          };
+        }
       });
     },
     async singlePart(type,phrase){
-      if (type == 'fr'){
-        this.tab="fr";
-        for(let i = 0 ; i < this.settings.frenchRepetitions ; i++)
-        {
-          this.frPhrase = phrase.fields.French;
-          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+      return new Promise(async (resolve,reject) => {
+        if (type == 'fr'){
+          this.tab="fr";
+          for(let i = 0 ; i < this.settings.frenchRepetitions ; i++)
+          {
+            this.frPhrase = phrase.fields.French;
+            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+          }
         }
-      }
-      if (type == 'en'){
-        this.tab = "en";
-        for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
-        {
-          this.enPhrase = phrase.fields.English;
-          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
-        }   
-      }
-      if (type == 'inter'){
-          this.gapPauseWatch = true;
-          this.gapPause = false;
-          this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),this.settings.pauseSeconds * 1000));
-          this.gapPauseWatch = false;
-      }
+        if (type == 'en'){
+          this.tab = "en";
+          for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
+          {
+            this.enPhrase = phrase.fields.English;
+            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+          }   
+        }
+        if (type == 'inter'){
+          if ( this.settings.type == interTypeEnum.pause){
+            this.gapPauseWatch = true;
+            this.gapPause = false;
+            this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),this.settings.pauseSeconds * 1000));
+            this.gapPauseWatch = false;
+            }
+        }
+        resolve();
+      });
     },
     async playSubPhrase(audioURL){
       if(this.audio == null)
@@ -192,6 +232,9 @@ export default {
   computed:{
     ...mapGetters('playlist', ['getPlayedPhrases','getSettings']),
     ...mapState('playlist', ['currentQueue','currentActiveId','lessonStarted']),
+    hideENTab(){
+      return this.settings ? this.settings.learningMode != learningMode.listenRepeat : true;
+    },
     progressVal(){
       var playlistLength = this.currentQueue.length;
       var playedPhrasesLength = this.getPlayedPhrases.length;
