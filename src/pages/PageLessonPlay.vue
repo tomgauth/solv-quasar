@@ -110,43 +110,48 @@ export default {
       // depending on mode of playing
       return new Promise(async (resolve,reject) => {
         // french phrase
+         await this.singlePart('fr',phrase);
+        // intermediate
+        if ( this.settings.type == interTypeEnum.pause){
+         await this.singlePart('inter',phrase);
+        }
+        if(this.gapPause == true){
+          this.delegateFunc = async ()=>{
+          // english phrase
+          await this.singlePart('en',phrase);
+          };
+        }
+        else {
+          // english phrase
+          await this.singlePart('en',phrase);
+        }
+
+        resolve();
+      });
+    },
+    async singlePart(type,phrase){
+      if (type == 'fr'){
         this.tab="fr";
         for(let i = 0 ; i < this.settings.frenchRepetitions ; i++)
         {
           this.frPhrase = phrase.fields.French;
           await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
         }
-        // intermediate
-        if ( this.settings.type == interTypeEnum.pause){
+      }
+      if (type == 'en'){
+        this.tab = "en";
+        for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
+        {
+          this.enPhrase = phrase.fields.English;
+          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+        }   
+      }
+      if (type == 'inter'){
           this.gapPauseWatch = true;
           this.gapPause = false;
           this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),this.settings.pauseSeconds * 1000));
           this.gapPauseWatch = false;
-        }
-        if(this.gapPause == true){
-          this.delegateFunc = async ()=>{
-          // english phrase
-          this.tab = "en";
-          for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
-          {
-            this.enPhrase = phrase.fields.English;
-            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
-          }
-          resolve();
-          };
-        }
-        else {
-          // english phrase
-          this.tab = "en";
-          for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
-          {
-            this.enPhrase = phrase.fields.English;
-            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
-          }
-          resolve();
-        }
-
-      });
+      }
     },
     async playSubPhrase(audioURL){
       if(this.audio == null)
