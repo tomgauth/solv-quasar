@@ -93,9 +93,10 @@ export default {
         this.setAudioStatus({ phraseId:phrase.id,status:audioStatusEnum.played });
         this.setCurrentActive(null);
         //gap delay
+        var settings = this.getSettings;
         this.gapPauseWatch = true;
         this.gapPause = false;
-        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),500));
+        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),settings.interTrackPauseSeconds * 1000));
         this.gapPauseWatch = false;
 
         if (this.gapPause)
@@ -106,34 +107,43 @@ export default {
       }
     },
     async playPhrase(phrase){
+      var settings = this.getSettings;
       // depending on mode of playing
       return new Promise(async (resolve,reject) => {
         // french phrase
         this.tab="fr";
-        this.frPhrase = phrase.fields.French;
-        await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+        for(let i = 0 ; i < settings.frenchRepetitions ; i++)
+        {
+          this.frPhrase = phrase.fields.French;
+          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+        }
         // intermediate
-        var interSettings = this.getIntermediateSettings;
-        if ( interSettings.type == interTypeEnum.pause){
+        if ( settings.type == interTypeEnum.pause){
           this.gapPauseWatch = true;
           this.gapPause = false;
-          this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),interSettings.pauseSeconds * 1000));
+          this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),settings.pauseSeconds * 1000));
           this.gapPauseWatch = false;
         }
         if(this.gapPause == true){
           this.delegateFunc = async ()=>{
           // english phrase
           this.tab = "en";
-          this.enPhrase = phrase.fields.English;
-          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+          for(let i = 0 ; i < settings.frenchRepetitions ; i++)
+          {
+            this.enPhrase = phrase.fields.English;
+            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+          }
           resolve();
           };
         }
         else {
           // english phrase
           this.tab = "en";
-          this.enPhrase = phrase.fields.English;
-          await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+          for(let i = 0 ; i < settings.frenchRepetitions ; i++)
+          {
+            this.enPhrase = phrase.fields.English;
+            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+          }
           resolve();
         }
 
@@ -176,7 +186,7 @@ export default {
     }
   },
   computed:{
-    ...mapGetters('playlist', ['getPlayedPhrases','getIntermediateSettings']),
+    ...mapGetters('playlist', ['getPlayedPhrases','getSettings']),
     ...mapState('playlist', ['currentQueue','currentActiveId','lessonStarted']),
     progressVal(){
       var playlistLength = this.currentQueue.length;

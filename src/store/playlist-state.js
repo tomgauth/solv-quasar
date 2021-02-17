@@ -1,17 +1,19 @@
 import axios from 'axios';
-import { audioStatusEnum,interTypeEnum } from '../app.constants';
-import { firebaseStorage } from '../boot/firebase';
+import { audioStatusEnum,interTypeEnum,learningMode,repetitionType } from '../app.constants';
+
 
 const state = {
     lessonStarted:false,
     currentQueue:[],
     currentActiveId:null,
     settings:{
-        intermediate:{
             type:interTypeEnum.pause,
             pauseSeconds:1,
-            interTrackURL:null
-        }
+            interTrackPauseSeconds:0.5,
+            learningMode: learningMode.comprehension,
+            interTrackURL:null,
+            frenchRepetitions:1,
+            englishRepetitions:1
     }
 }
 
@@ -34,6 +36,21 @@ const mutations = {
     },
     lessonStatusChanged(state,payload){
         state.lessonStarted = payload;
+    },
+    repetitionSet(state,payload){
+        if(payload.type == repetitionType.english)
+            state.settings.englishRepetitions = payload.value;
+        else if(payload.type == repetitionType.french)
+            state.settings.frenchRepetitions = payload.value;
+    },
+    pauseTimeSet(state,payload){
+        state.settings.pauseSeconds = payload;
+    },
+    interTrackPauseTimeSet(state,payload){
+        state.settings.interTrackPauseSeconds = payload;
+    },
+    modeSet(state,payload){
+        state.settings.learningMode = payload;
     }
 }
 
@@ -44,11 +61,23 @@ const actions = {
   setAudioStatus({ commit },payload ){
         commit('audioStatusSet',payload);
     },
-  setStatusPendingAll({commit}){
+  setStatusPendingAll({ commit }){
         commit('statusPendingAll');
   },
-  lessonStatusChange({commit},payload){    
+  lessonStatusChange({ commit },payload){    
         commit('lessonStatusChanged',payload);
+  },
+  setRepetitions({ commit },payload){
+    commit('repetitionSet',payload);
+  },
+  setPauseTime({ commit },payload){
+    commit('pauseTimeSet',payload);
+  },
+  setInterTrackPauseTime({ commit },payload){
+    commit('interTrackPauseTimeSet',payload);
+  },
+  setMode({ commit },payload){
+    commit('modeSet',payload);
   },
   async populateCurrentQueue({ dispatch, commit, getters, rootGetters },payload)
     {
@@ -63,13 +92,13 @@ const actions = {
            var enblob = await axios.get(downUrl,{ responseType:'blob' });
            var enAudioURL = URL.createObjectURL(enblob.data);
            // merge policy pause for now, option for intermediate track in future
-           var interSettings = getters.getIntermediateSettings;
-           if ( interSettings.type == interTypeEnum.pause )
+           var settings = getters.getSettings;
+           if ( settings.type == interTypeEnum.pause )
            {
                     phrase.fields.mergedSequence = {
                         frAudioURL,
                         enAudioURL,
-                        interSettings
+                        settings
                     };
            }
            phrase.fields.status = audioStatusEnum.pending;
@@ -82,8 +111,8 @@ const getters = {
     getPlayedPhrases(state){
         return state.currentQueue.filter((phrase) => phrase.fields.status == audioStatusEnum.played);
     },
-    getIntermediateSettings(state){
-        return state.settings.intermediate;
+    getSettings(state){
+        return state.settings;
     }
 }
 

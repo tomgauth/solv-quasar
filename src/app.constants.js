@@ -10,3 +10,14 @@ export const interTypeEnum = Object.freeze({
     "pause":1,
     "track":2,
 });
+// Learning mode
+export const learningMode = Object.freeze({
+    "comprehension":1,
+    "recall":2,
+    "listenRepeat":3
+});
+// Repetition Type
+export const repetitionType = Object.freeze({
+    "english":1,
+    "french":2
+});
