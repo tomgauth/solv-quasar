@@ -67,7 +67,8 @@ export default {
       enPhrase:"English Translation",
       gapPause:false,
       delegateFunc:null,
-      gapPauseWatch:false
+      gapPauseWatch:false,
+      settings:null
     }
   },
   methods:{
@@ -93,10 +94,9 @@ export default {
         this.setAudioStatus({ phraseId:phrase.id,status:audioStatusEnum.played });
         this.setCurrentActive(null);
         //gap delay
-        var settings = this.getSettings;
         this.gapPauseWatch = true;
         this.gapPause = false;
-        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),settings.interTrackPauseSeconds * 1000));
+        this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),this.settings.interTrackPauseSeconds * 1000));
         this.gapPauseWatch = false;
 
         if (this.gapPause)
@@ -107,28 +107,27 @@ export default {
       }
     },
     async playPhrase(phrase){
-      var settings = this.getSettings;
       // depending on mode of playing
       return new Promise(async (resolve,reject) => {
         // french phrase
         this.tab="fr";
-        for(let i = 0 ; i < settings.frenchRepetitions ; i++)
+        for(let i = 0 ; i < this.settings.frenchRepetitions ; i++)
         {
           this.frPhrase = phrase.fields.French;
           await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
         }
         // intermediate
-        if ( settings.type == interTypeEnum.pause){
+        if ( this.settings.type == interTypeEnum.pause){
           this.gapPauseWatch = true;
           this.gapPause = false;
-          this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),settings.pauseSeconds * 1000));
+          this.gapPause = await new Promise(resolve => setTimeout(()=>resolve(this.gapPause),this.settings.pauseSeconds * 1000));
           this.gapPauseWatch = false;
         }
         if(this.gapPause == true){
           this.delegateFunc = async ()=>{
           // english phrase
           this.tab = "en";
-          for(let i = 0 ; i < settings.frenchRepetitions ; i++)
+          for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
           {
             this.enPhrase = phrase.fields.English;
             await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
@@ -139,7 +138,7 @@ export default {
         else {
           // english phrase
           this.tab = "en";
-          for(let i = 0 ; i < settings.frenchRepetitions ; i++)
+          for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
           {
             this.enPhrase = phrase.fields.English;
             await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
@@ -207,6 +206,7 @@ export default {
     }
   },
   mounted(){
+    this.settings = this.getSettings;
     this.lessonStatusChange(true);
     this.currentActiveId == null ? this.initializePlaylist() : this.playPlaylist();
   },
