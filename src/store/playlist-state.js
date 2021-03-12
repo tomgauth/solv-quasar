@@ -37,6 +37,9 @@ const mutations = {
     lessonStatusChanged(state,payload){
         state.lessonStarted = payload;
     },
+    currentQueueCleared(){
+        state.currentQueue = [];
+    },
     repetitionSet(state,payload){
         if(payload.type == repetitionType.english)
             state.settings.englishRepetitions = payload.value;
@@ -67,6 +70,9 @@ const actions = {
   lessonStatusChange({ commit },payload){    
         commit('lessonStatusChanged',payload);
   },
+  resetActiveIndex({ commit }){
+    commit('currentActiveSet',null);
+  },
   setRepetitions({ commit },payload){
     commit('repetitionSet',payload);
   },
@@ -78,6 +84,9 @@ const actions = {
   },
   setMode({ commit },payload){
     commit('modeSet',payload);
+  },
+  clearCurrentQueue({ commit }){
+    commit('currentQueueCleared');
   },
   async populateCurrentQueue({ dispatch, commit, getters, rootGetters },payload)
     {

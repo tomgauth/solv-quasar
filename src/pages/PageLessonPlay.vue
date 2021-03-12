@@ -72,7 +72,7 @@ export default {
     }
   },
   methods:{
-    ...mapActions('playlist', ['setAudioStatus','setCurrentActive','setStatusPendingAll','lessonStatusChange']),
+    ...mapActions('playlist', ['setAudioStatus','setCurrentActive','setStatusPendingAll','lessonStatusChange','resetActiveIndex','clearCurrentQueue']),
     async initializePlaylist(){
       this.querying = true;
       await this.$store.dispatch("playlist/populateCurrentQueue");
@@ -222,10 +222,13 @@ export default {
     },
     abort(){
       this.lessonStatusChange(false);
+      this.resetActiveIndex();
+      this.clearCurrentQueue();
       this.$router.push("/");
     },
     restartLesson(){
       this.lessonStatusChange(false);
+      this.resetActiveIndex();
       this.$router.push('/');
     }
   },
