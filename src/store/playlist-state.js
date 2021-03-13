@@ -90,11 +90,16 @@ const actions = {
   },
   async populateCurrentQueue({ dispatch, commit, getters, rootGetters },payload)
     {
+        
        var selectedPhrases = JSON.parse(JSON.stringify(rootGetters['items/getKeyPhrasesList'].filter(phrase => phrase.fields.selected)));
        for (const phrase of selectedPhrases) {
-
+        console.log(phrase);
         //    var downUrl = await firebaseStorage.refFromURL(phrase.fields.audioUrl[0]).getDownloadURL();
            var downUrl = phrase.fields.audioUrl[0];
+           //check if downUrl actually exists
+           if(audioUrl && audioUrl[0].hasOwnProperty('error')){
+               console.log("Dangerous logic here!");
+           }
            var frblob = await axios.get(downUrl,{ responseType:'blob' });
            var frAudioURL =  URL.createObjectURL(frblob.data);
            //dummy fetch enblob

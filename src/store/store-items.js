@@ -13,7 +13,14 @@ const state = {
 	search: '',
 	itemIndex: 0,
 	keyPhrases:[],
-	Levels:[],
+	Levels:[
+		{
+			id:'-1',
+			fields:{
+				Name:'Not Specified'
+			}
+		}
+	],
 	Tags:{
 		Tenses:[],
 		Registres:[],
@@ -27,8 +34,10 @@ const state = {
 const mutations = {
 
 	keyPhrasesPopulated(state,payload){
-		var filtered = payload.filter(rec => !rec.fields.audioUrl[0].hasOwnProperty("error"));
-		state.keyPhrases = filtered;
+		console.log(payload);
+		// var filtered = payload.filter(rec => !rec.fields.audioUrl[0].hasOwnProperty("error"));
+		// state.keyPhrases = filtered;
+		state.keyPhrases = payload;
 	},
 	keyPhrasesDetailsPopulated(state,payload){
         Object.assign(state.keyPhrases)
@@ -93,7 +102,7 @@ const actions = {
 		var keyPhrases = state.keyPhrases;
 		var filteredPhrases = keyPhrases.filter(phrase => payload.includes(phrase.id));
 		//Populate Associated Levels
-		var levelsIds = filteredPhrases.map(val => val.fields.Level[0]);
+		var levelsIds = filteredPhrases.map(val => val.fields.Level ? val.fields.Level[0] : 'Not Specified');
 		var uniqueLevelsIds = [...new Set(levelsIds)];
 		await dispatch('populateLevels',uniqueLevelsIds);
 
@@ -172,7 +181,7 @@ const getters = {
 					'Record ID' : phrase['Record ID'],
 					'English' : phrase.English,
 					'French' : phrase.French, 
-					'Level' : state.Levels.find(level => level.id == phrase.Level[0]).fields.Name,
+					'Level' : state.Levels.find(level => level.id == (phrase.Level ? phrase.Level[0] : '-1')).fields.Name,
 					'audioUrl' : phrase.audioUrl[0],
 					'selected' : phrase.selected,
 					'Tags': {
