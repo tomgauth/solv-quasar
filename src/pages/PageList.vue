@@ -43,7 +43,7 @@
               <q-badge outline class="q-pa-sm q-mx-xs" color="grey" rounded text-color="black" :label="props.row.Tags.Mood" />
             </q-card-section>
             <q-card-section class="row  items-center justify-center">
-              <audio-btn size="18px" :audioUrl="props.row.audioUrl"></audio-btn>
+              <audio-btn size="18px" :french="props.row.French" :audioUrl="props.row.audioUrl"  ></audio-btn>
             </q-card-section>
             <q-card-section class="column items-center justify-center">
                 <q-badge color="black" outline class="q-pa-sm" text-color="white" label="Learn this phrase" />
@@ -146,7 +146,7 @@
               {{ props.row.Level }}
           </q-td>
           <q-td key="Audio" :props="props">
-            <audio-btn :audioUrl="props.row.audioUrl"></audio-btn>
+            <audio-btn :audioUrl="props.row.audioUrl" :french="props.row.French"></audio-btn>
           </q-td>
         </q-tr>
       </template>
@@ -217,7 +217,6 @@ export default {
       this.tagsOptions = this.getAllTagsValues;
     },
     onLeft(details){
-      console.log(details);
     },
     customFilter(){
      return this.allFiltersApplied();

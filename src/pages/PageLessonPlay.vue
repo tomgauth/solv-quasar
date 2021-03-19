@@ -179,7 +179,7 @@ export default {
           for(let i = 0 ; i < this.settings.englishRepetitions ; i++)
           {
             this.enPhrase = phrase.fields.English;
-            await this.playSubPhrase(phrase.fields.mergedSequence.frAudioURL);
+            await this.playSubPhrase(phrase.fields.mergedSequence.enAudioURL);
           }   
         }
         if (type == 'inter'){

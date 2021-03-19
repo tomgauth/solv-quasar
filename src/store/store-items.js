@@ -4,6 +4,8 @@ import { uid } from 'quasar'
 import moment from 'moment'
 import airtableService from './services/airtable.service';
 import { AirParams } from './services/airtableconstants';
+import tts from './services/googleTTS.service';
+import { googleTTSVoicesConfig } from '../app.constants';
 // import { longStackSupport } from 'q'
 
 const state = {
@@ -34,7 +36,6 @@ const state = {
 const mutations = {
 
 	keyPhrasesPopulated(state,payload){
-		console.log(payload);
 		// var filtered = payload.filter(rec => !rec.fields.audioUrl[0].hasOwnProperty("error"));
 		// state.keyPhrases = filtered;
 		state.keyPhrases = payload;
@@ -87,7 +88,33 @@ const actions = {
 				[AirParams.view]:"Atom"
 			 });
 			 //adding selected field
-			 response.records.forEach(rec => rec.fields.selected = true);
+			 for (const rec of response.records) {
+				rec.fields.selected = true;
+				//french sound
+				rec.fields.audioUrl[0] = { src : rec.fields.audioUrl[0] };
+				rec.fields.audioUrl[0].synthetic = false;
+				if(rec.fields.audioUrl[0].src.hasOwnProperty("error"))
+				{
+					rec.fields.audioUrl[0].synthetic = true;
+					rec.fields.audioUrl[0].src = "";
+				};
+				//engilsh sound
+				if(!rec.fields.hasOwnProperty("English Audio")){
+					rec.fields["English Audio"] = {
+						synthetic:true,
+						src:''
+					};
+				}
+				else{
+					const tempurl = rec.fields["English Audio"][0].url;
+					delete rec.fields["English Audio"];
+					rec.fields["English Audio"] = {
+						synthetic : false,
+						src : tempurl
+					}
+				}
+			 
+			 };
 			 //
 			commit('keyPhrasesPopulated',response.records);
 			resolve();

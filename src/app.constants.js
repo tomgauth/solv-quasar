@@ -21,3 +21,16 @@ export const repetitionType = Object.freeze({
     "english":1,
     "french":2
 });
+
+export const googleTTSVoicesConfig = Object.freeze({
+    "french":{
+        languageCode : "fr-CA",
+        name : "fr-CA-Wavenet-D",
+        ssmlGender : "MALE"
+    },
+    "english":{
+        languageCode : "en-US",
+        name : "en-US-Wavenet-I",
+        ssmlGender : "MALE"
+    },
+});

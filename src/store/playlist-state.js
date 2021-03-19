@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { audioStatusEnum,interTypeEnum,learningMode,repetitionType } from '../app.constants';
+import tts from './services/googleTTS.service'
+import { audioStatusEnum,interTypeEnum,learningMode,repetitionType,googleTTSVoicesConfig } from '../app.constants';
 
 
 const state = {
@@ -93,18 +94,34 @@ const actions = {
         
        var selectedPhrases = JSON.parse(JSON.stringify(rootGetters['items/getKeyPhrasesList'].filter(phrase => phrase.fields.selected)));
        for (const phrase of selectedPhrases) {
-        console.log(phrase);
         //    var downUrl = await firebaseStorage.refFromURL(phrase.fields.audioUrl[0]).getDownloadURL();
            var downUrl = phrase.fields.audioUrl[0];
            //check if downUrl actually exists
-           if(audioUrl && audioUrl[0].hasOwnProperty('error')){
-               console.log("Dangerous logic here!");
+           var frblob = '';
+           if(!downUrl.synthetic){
+               frblob = await axios.get(downUrl.src,{ responseType:'blob' });
+               frblob = frblob.data;
            }
-           var frblob = await axios.get(downUrl,{ responseType:'blob' });
-           var frAudioURL =  URL.createObjectURL(frblob.data);
+           else{          					//add french google TTS audio
+                var resp = await tts.getAudio(phrase.fields.French,googleTTSVoicesConfig.french);
+                const base64resp = await fetch(`data:audio/mp3;base64,${resp.data.audioContent}`);
+                frblob = await base64resp.blob();
+           }
+           var frAudioURL =  URL.createObjectURL(frblob);
            //dummy fetch enblob
-           var enblob = await axios.get(downUrl,{ responseType:'blob' });
-           var enAudioURL = URL.createObjectURL(enblob.data);
+           var enDownUrl = phrase.fields["English Audio"];
+           var enblob = '';
+           if(!enDownUrl.synthetic){
+            enblob = await axios.get(enDownUrl.src,{ responseType:'blob' });
+            enblob = enblob.data;
+           }
+           else{          					//add french google TTS audio
+            var resp = await tts.getAudio(phrase.fields.English,googleTTSVoicesConfig.english);
+            const base64resp = await fetch(`data:audio/mp3;base64,${resp.data.audioContent}`);
+            enblob = await base64resp.blob();
+           }
+           
+           var enAudioURL = URL.createObjectURL(enblob);
            // merge policy pause for now, option for intermediate track in future
            var settings = getters.getSettings;
            if ( settings.type == interTypeEnum.pause )
